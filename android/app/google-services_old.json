@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "271857569272",
+    "project_id": "hexagonuser-fb849",
+    "storage_bucket": "hexagonuser-fb849.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271857569272:android:67180486992c3f0d6b5a0d",
+        "android_client_info": {
+          "package_name": "com.hexagonuser"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "271857569272-dncv5e2o3pn9vg3vja075slmf01dfl9k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsZhYq9MZ6sMgWm_kmFnS5finJ9ulaVRo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "271857569272-dncv5e2o3pn9vg3vja075slmf01dfl9k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

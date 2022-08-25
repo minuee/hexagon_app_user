@@ -1,0 +1,1 @@
+appcenter codepush release-react -a sh43con-gmail.com/hexagonUser-Android -d Staging

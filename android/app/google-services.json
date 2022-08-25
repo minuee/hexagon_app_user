@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1097848804689",
+    "project_id": "hexagon-95192",
+    "storage_bucket": "hexagon-95192.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097848804689:android:f4ec5d84f9699bace12f70",
+        "android_client_info": {
+          "package_name": "com.hexagonsales"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1097848804689-3ur0pvnn3td7o5hnkt7950do5lj887d7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0IXIhSUJ1bjVUVYkdud9kdpFzLuaDcQQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1097848804689-3ur0pvnn3td7o5hnkt7950do5lj887d7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
