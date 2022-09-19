@@ -26,6 +26,9 @@ import { apiObject } from "../Apis";
 const iconEvent = require('../../../assets/icons/icon_event.png');
 const iconEventterm = require('../../../assets/icons/icon_eventterm.png');
 const iconEventlimit = require('../../../assets/icons/icon_eventlimit.png');
+
+const bannerWidth = SCREEN_WIDTH-40;
+const bannerHeight = (( SCREEN_WIDTH-40 ) * 1024 ) / 450;
 class EventScreen extends Component {
     constructor(props) {
         super(props);
@@ -207,8 +210,8 @@ class EventScreen extends Component {
                                             //resizeMode='cover'
                                             //style={styles.markerAgentWrap}
                                             source={{uri:DEFAULT_CONSTANTS.defaultImageDomain+item.event_img}}       
-                                            resizeMode={FastImage.resizeMode.cover}
-                                            style={{width:'100%',minHeight:120}}
+                                            resizeMode={FastImage.resizeMode.contain}
+                                            style={{width:bannerWidth,minHeight:150}}
                                         />
                                     </TouchableOpacity>
                                 )

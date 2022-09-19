@@ -16,12 +16,7 @@ import CommonUtil from '../../Utils/CommonUtil';
 import CommonFunction from '../../Utils/CommonFunction';
 import Loader from '../../Utils/Loader';
 import { apiObject } from "../Apis";
-const mockData1  = [
-    {id : 1, date : '2020.11.11' ,title : '주문 20201101-D12345 0.5% 적립', type : '+' , point : 198},
-    {id : 2, date : '2020.11.11', title : '주문 20201101-D12345 사용', type : '-' , point : 98},
-    {id : 3, date : '2020.11.19', title : '적립금 소멸', type : '-' , point : 298},
-    {id : 4, date : '2020.11.19', title : '주문 20201101-D12347 0.5% 적립', type : '+' , point : 398}
-]
+
 const DefaultPaginate = 10;
 class MyPointListScreen extends Component {
     constructor(props) {
@@ -211,7 +206,7 @@ class MyPointListScreen extends Component {
                             </TouchableOpacity>
                         </View>
                     }
-                    <View style={[CommonStyle.blankArea,{backgroundColor:'#f7f7f7'}]}></View>
+                    <View style={[CommonStyle.blankArea,{backgroundColor:'#fff'}]}></View>
                     { this.state.moreLoading &&
                         <View style={CommonStyle.moreWrap}>
                             <Loader screenState={{isLoading:this.state.loading,color:DEFAULT_COLOR.base_color}} />

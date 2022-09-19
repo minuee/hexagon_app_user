@@ -30,7 +30,7 @@ import ToggleBox from '../../Utils/ToggleBox';
 import PopLayerAddress from './PopLayerAddress';
 import PopLayerCoupon from './PopLayerCoupon';
 import UseYakwanScreen from '../Tabs04/UseYakwanScreen';
-import SelectType from "../../Utils/SelectType";
+import SelectBank from "../../Utils/SelectBank";
 
 const CHECKNOX_OFF = require('../../../assets/icons/checkbox_off.png');
 const CHECKNOX_ON = require('../../../assets/icons/checkbox_on.png');
@@ -47,8 +47,8 @@ const alertContents =
 const maxDateVbank =  moment().add(2, 'd').format('YYYYMMDD');
 const mockData2  = [
     {id : 1, name  : '신용카드' , code : 'card' },
-    {id : 2, name  : '휴대폰' , code : 'phone' },
-    {id : 3, name  : '무통장 입금', code : 'vbank' }
+    /* {id : 2, name  : '휴대폰' , code : 'phone' }, */
+    {id : 2, name  : '무통장 입금', code : 'vbank' }
 ]
 const mockData3  = [
     {id : 1, name  : DEFAULT_CONSTANTS.return_CashTitle,code:'Cash'},
@@ -106,7 +106,12 @@ class OrderDetailScreen extends Component {
             couponList : [],
             pointList :[],
             deliveryList : [],
-            
+            refundData : {
+                refund_bankcode : null,
+                refund_bankname : null,
+                refund_bankaccount : null,
+                refund_accountname : null
+            },            
             //poplayer
             popLayerView : false,
             _closepopLayer : this._closepopLayer.bind(this),
@@ -133,6 +138,8 @@ class OrderDetailScreen extends Component {
     } 
     getBaseData = async(member_pk) => {
         let returnCode = {code:9998};
+        const BankCode = await AsyncStorage.getItem('BankCode');
+        
         try {            
             const url = DEFAULT_CONSTANTS.apiAdminDomain + '/v1/order/memberinfo/' + member_pk ;
             const token = this.props.userToken.apiToken;
@@ -153,8 +160,22 @@ class OrderDetailScreen extends Component {
                     deliveryList : !CommonUtil.isEmpty(returnCode.data.userDetail.delivery)?returnCode.data.userDetail.delivery:[],
                     orderSeq : 0,
                     formAddressPk :!CommonUtil.isEmpty(userDeliveryData) ? userDeliveryData.memberdelivery_pk : 0,
-                    formAddressData : !CommonUtil.isEmpty(userDeliveryData) ? userDeliveryData : {}
+                    formAddressData : !CommonUtil.isEmpty(userDeliveryData) ? userDeliveryData : {},
+                    refundData : {
+                        refund_bankcode : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankcode)?returnCode.data.userDetail.refund_bankcode : null,
+                        refund_bankname : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankname)?returnCode.data.userDetail.refund_bankname : null,
+                        refund_bankaccount : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankaccount)?returnCode.data.userDetail.refund_bankaccount : null,
+                        refund_accountname : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_accountname)?returnCode.data.userDetail.refund_accountname : null
+                    },
+                    formRefundAccount : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankaccount)?returnCode.data.userDetail.refund_bankaccount : null,
+                    formRefundAccountName : !CommonUtil.isEmpty(returnCode.data.userDetail.refund_accountname)?returnCode.data.userDetail.refund_accountname : null,
+                    formRefundBankCode:!CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankcode)?returnCode.data.userDetail.refund_bankcode : null,
+                    formRefundBankName:!CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankname)?returnCode.data.userDetail.refund_bankname : null,
                 })
+                if ( !CommonUtil.isEmpty(BankCode)) {
+                    this.checkStorageCode(BankCode, !CommonUtil.isEmpty(returnCode.data.userDetail.refund_bankcode)?returnCode.data.userDetail.refund_bankcode : null);
+                    //console.log('BankCode',BankCode)  
+                }
                
             }else{
                 CommonFunction.fn_call_toast('처리중 오류가 발생하였습니다1.',1000);
@@ -176,8 +197,8 @@ class OrderDetailScreen extends Component {
         }
     }
 
-    checkStorageCode = async (arr) => {
-        //console.log('BankCode',arr)  
+    checkStorageCode = async (arr, passCode) => {
+        //console.log('BankCode',JSON.parse(arr))  
         let newBankCode = [];
         await JSON.parse(arr).forEach(function(element,index,array){            
             if ( element.bankcode2) {
@@ -185,12 +206,14 @@ class OrderDetailScreen extends Component {
                     id:index,
                     idx:element.bankidx,
                     name:element.bankname,
-                    code:element.bankcode2
+                    code:element.bankcode2,
+                    logo : element.logo,
+                    checked : passCode == element.bankcode2 ?  true :  false
                 })
             }
         })
-        console.log('newBankCode',newBankCode)  
-        await this.setState({bankArray: newBankCode});
+        //console.log('newBankCode',newBankCode)  
+        this.setState({bankArray: newBankCode});
     }
 
     async UNSAFE_componentWillMount() {
@@ -203,11 +226,7 @@ class OrderDetailScreen extends Component {
                     cartList.push(child.cart_pk);
                 })
             })
-            const BankCode = await AsyncStorage.getItem('BankCode');
-            if ( !CommonUtil.isEmpty(BankCode)) {
-                this.checkStorageCode(BankCode);
-                console.log('BankCode',BankCode)  
-            }
+            
             this.setState({
                 cartList : cartList,
                 selectedArray : selectedArray,
@@ -301,7 +320,7 @@ class OrderDetailScreen extends Component {
         }
 
     }
-    animatedHeight = new Animated.Value(SCREEN_HEIGHT * 0.5);
+    animatedHeight = new Animated.Value(SCREEN_HEIGHT * 0.7);
     animatedHeight2 = new Animated.Value(SCREEN_HEIGHT);
     animatedHeight3 = new Animated.Value(SCREEN_HEIGHT * 0.6);
 
@@ -463,6 +482,11 @@ class OrderDetailScreen extends Component {
 
     
     actionOrder = async() => { //OrderEndingStack
+
+        console.log(`1111`, 
+        this.state.refundData
+        )
+
         if ( CommonUtil.isEmpty(this.state.formAddressPk)) {
             CommonFunction.fn_call_toast_top('배송지를 선택해주세요',2000,'center');return;
         }else if ( CommonUtil.isEmpty(this.state.formUserName)) {
@@ -474,7 +498,7 @@ class OrderDetailScreen extends Component {
         }else if ( this.state.settleMethode === 'vbank'  &&  CommonUtil.isEmpty(this.state.formRefundBankCode) ) {
             CommonFunction.fn_call_toast('환불용 은행을 선택해 주세요',2000);return;
         }else if ( this.state.settleMethode === 'vbank'  &&  CommonUtil.isEmpty(this.state.formRefundAccountName) ) {
-            CommonFunction.fn_call_toast('환불용 계좌수신명을 입력해 주세요',2000);return;
+            CommonFunction.fn_call_toast('환불용 계좌이름을 입력해 주세요',2000);return;
         }else if ( this.state.settleMethode === 'vbank'  &&  CommonUtil.isEmpty(this.state.formRefundAccount) ) {
             CommonFunction.fn_call_toast('환불용 계좌번호를 입력해 주세요',2000);return;
         }else if ( CommonUtil.isEmpty(this.state.refundMethode) ) {
@@ -583,7 +607,11 @@ class OrderDetailScreen extends Component {
             const buyerName = this.state.formUserName;
             const buyerTel= this.state.formUserPhone;
             const buyerEmail = CommonUtil.isEmpty(this.props.userToken.email)? "" :CommonFunction.fn_dataDecode(this.props.userToken.email);
-            const cal_selectedRewardAmount = (this.state.selectedRewardAmount-this.state.formUsePoint-this.state.formUseCoupon)*this.state.userRate > 0 ? (this.state.selectedRewardAmount-this.state.formUsePoint-this.state.formUseCoupon)*this.state.userRate : 0;
+            const cal_selectedRewardAmount = (
+                this.state.selectedRewardAmount - this.state.formUsePoint - this.state.formUseCoupon)
+                * this.state.userRate > 0 ? (
+                    this.state.selectedRewardAmount - this.state.formUsePoint - this.state.formUseCoupon )* this.state.userRate : 0 ;
+
             const params = {
                 pay_method: method,
                 merchant_uid: merchantUid,
@@ -708,7 +736,7 @@ class OrderDetailScreen extends Component {
                     TextUserCode : this.state.TextUserCode,
                     settleMethode : this.state.settleMethode,
                     refundMethode : this.state.refundMethode,
-                    formAccountName : this.state.refundMethode,
+                    formAccountName : this.state.formAccountName,
                     formRefundAccount : this.state.formRefundAccount,
                     formRefundBankCode : this.state.formRefundBankCode,
                     formRefundBankName : this.state.formRefundBankName,
@@ -755,8 +783,8 @@ class OrderDetailScreen extends Component {
     selectFilter = async(filt) => {    
         let bankData = this.state.bankArray;     
         this.setState({
-            formRefundBankCode:bankData[filt-1].code,
-            formRefundBankName:bankData[filt-1].name
+            formRefundBankCode:bankData[filt].code,
+            formRefundBankName:bankData[filt].name
         }); 
     }
 
@@ -789,7 +817,7 @@ class OrderDetailScreen extends Component {
         }
     }
 
-
+    
     render() {
         if ( this.state.loading ) {
             return (
@@ -968,7 +996,10 @@ class OrderDetailScreen extends Component {
                                     <CustomTextR style={styles.menuTitleSubText}>배송지</CustomTextR>     
                                 </View>
                                 <View style={styles.deliveryDataWrap}>
-                                    <TouchableOpacity onPress={()=> this.setState({showModal:true})} style={styles.deliveryAddressWrap}>
+                                    <TouchableOpacity 
+                                        onPress={()=> this.setState({showModal:true})} 
+                                        style={styles.deliveryAddressWrapNew}
+                                    >
                                         {
                                             this.state.formAddressPk > 0 ?
                                             <CustomTextR style={[styles.menuTitleSubText,{color:DEFAULT_COLOR.base_color}]}>{this.state.formAddressData.address}{this.state.formAddressData.address_detail}</CustomTextR>     
@@ -1271,8 +1302,8 @@ class OrderDetailScreen extends Component {
                             </View>
                             <View style={[styles.formTitleWrap,{marginBottom:10,flexDirection:'row'}]}>     
                                 <DropBoxIcon />                          
-                                <SelectType
-                                    isSelectSingle
+                                <SelectBank
+                                    isSelectSingle={true}
                                     style={CommonStyle.unSelectedBox}
                                     selectedTitleStyle={CommonStyle.selectBoxText}
                                     colorTheme={DEFAULT_COLOR.base_color_666}
@@ -1294,7 +1325,7 @@ class OrderDetailScreen extends Component {
                                 <TextInput       
                                     value={this.state.formRefundAccountName}                             
                                     style={[CommonStyle.inputBlank,CommonStyle.defaultOneWayForm]}
-                                    placeholder={'수신자명'}
+                                    placeholder={'계좌이름'}
                                     placeholderTextColor={DEFAULT_COLOR.base_color_666}
                                     onChangeText={text=>this.setState({formRefundAccountName:text})}
                                     multiline={false}
@@ -1524,7 +1555,10 @@ class OrderDetailScreen extends Component {
                                             size={PixelRatio.roundToNearestPixel(15)}                                    
                                             onPress={() => this.checkItem(index)}
                                         />
-                                        <CustomTextR style={CommonStyle.titleText2}>{item.address} {item.address_detail}</CustomTextR>
+                                        <View style={{flex:1,paddingHorizontal:10}}>
+                                            <CustomTextR style={CommonStyle.titleText2}>{item.address} {item.address_detail}</CustomTextR>
+                                        </View>
+                                        
                                     </TouchableOpacity>
                                     )
                                 })
@@ -1607,6 +1641,9 @@ const styles = StyleSheet.create({
     },
     deliveryAddressWrap : {
         flex:3,justifyContent:'center',paddingHorizontal:10,paddingVertical : Platform.OS === 'ios' ? 10 :0
+    },
+    deliveryAddressWrapNew : {
+        flex:3,paddingLeft:10,paddingRight:30,paddingVertical : Platform.OS === 'ios' ? 5 :0
     },
     deliveryButtonWrap: {
         flex:1,justifyContent:'center',alignItems:'flex-end',paddingRight:5
@@ -1821,10 +1858,10 @@ const styles = StyleSheet.create({
         paddingHorizontal:20,paddingVertical:15,flexDirection:'row'
     },
     modalDefaultWrap : {
-        paddingHorizontal:20,paddingVertical:15,flexDirection:'row',alignItems:'center'
+        paddingHorizontal:20,paddingVertical:10,flexDirection:'row',alignItems:'center'
     },
     modalSelectedWrap : {
-        paddingHorizontal:20,paddingVertical:15,backgroundColor:'#f4f4f4',flexDirection:'row',alignItems:'center'
+        paddingHorizontal:20,paddingVertical:10,backgroundColor:'#f4f4f4',flexDirection:'row',alignItems:'center'
     },
     modalLeftWrap : {
         flex:1,justifyContent:'center'

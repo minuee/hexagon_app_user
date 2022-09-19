@@ -12,17 +12,10 @@ const {width: SCREEN_WIDTH,height: SCREEN_HEIGHT} = Dimensions.get("window");
 const LOGO_IMAGE = require('../../assets/icons/logo.png');
 //공통상수
 import  * as getDEFAULT_CONSTANTS   from '../Constants';
-import CommonStyle from '../Style/CommonStyle';
-const DEFAULT_CONSTANTS = getDEFAULT_CONSTANTS.DEFAULT_CONSTANTS;
 const DEFAULT_TEXT = getDEFAULT_CONSTANTS.DEFAULT_TEXT;
-const DEFAULT_COLOR = getDEFAULT_CONSTANTS.DEFAULT_COLOR;
-import * as COMMON_CODES from '../Constants/Codes';
-import {CustomTextR, CustomTextB, CustomTextM, TextRobotoM,TextRobotoR} from '../Components/CustomText';
 import CommonFunction from '../Utils/CommonFunction';
 
 const BASE_HEIGHY = Platform.OS === 'android' ? 100 : CommonFunction.isIphoneX() ? 150 : 110;
-
-
 
 class CommonHeader extends React.Component {
     
@@ -52,7 +45,7 @@ class CommonHeader extends React.Component {
     }
     onLayoutHeader = (evt ) => {
         
-        console.log('height',evt.nativeEvent.layout.height);
+        //console.log('height',evt.nativeEvent.layout.height);
         this.setState({headerHeight : evt.nativeEvent.layout.height});
     }
     render() {

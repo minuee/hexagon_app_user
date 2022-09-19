@@ -38,8 +38,8 @@ class ProductListScreen extends Component {
         super(props);
         this.state = {
             loading : true,
-            orderSeq : 'pop',
-            tmpOrderSeq: 'pop',
+            orderSeq : 'new',
+            tmpOrderSeq: 'new',
             ismore :  false,
             productList : [],
             totalCount : 0,
@@ -59,7 +59,7 @@ class ProductListScreen extends Component {
     }
 
     getBaseData = async(category_pk,currentpage,morePage = false) => {
-        console.log('this.state.currentPage',this.state.currentPage)
+        console.log('getBaseData',category_pk)
         let returnCode = {code:9998};
         try {           
             let orderSeq = this.state.orderSeq; 
@@ -67,7 +67,7 @@ class ProductListScreen extends Component {
             const token = this.props.userToken.apiToken;
             let sendData = null;
             returnCode = await apiObject.API_getPageList(this.props,url,token,sendData);
-            console.log('ddddd',returnCode)
+            console.log('returnCode',returnCode)
             if ( returnCode.code === '0000'  ) {
                 if ( morePage ) {
                     this.moreDataUpdate(this.state.productList,returnCode )
@@ -87,7 +87,8 @@ class ProductListScreen extends Component {
             this.setState({loading:false,moreLoading : false})
         }
     }
-    async UNSAFE_componentWillMount() {        
+    async UNSAFE_componentWillMount() {       
+        console.log('UNSAFE_componentWillMount',this.props.extraData.params.screenData) 
         try{
             if ( !CommonUtil.isEmpty(this.props.extraData.params.screenData)) {
                 this.setState({
@@ -136,12 +137,14 @@ class ProductListScreen extends Component {
         let paddingToBottom = 1;
         paddingToBottom += event.nativeEvent.layoutMeasurement.height;                            
         if (event.nativeEvent.contentOffset.y + paddingToBottom >= event.nativeEvent.contentSize.height) {            
-            //this.scrollEndReach();
+            this.scrollEndReach();
         }
     }
 
     scrollEndReach = () => {       
-       
+        if ( this.state.ismore && !this.state.moreLoading ){            
+            this.getBaseData(this.state.category_pk,this.state.currentPage+1,true)
+        }
     }
     refreshingData = async() => {
     }
@@ -394,7 +397,9 @@ class ProductListScreen extends Component {
     render() {
         if ( this.state.loading ) {
             return (
-                <Loader screenState={{isLoading:this.state.loading,color:DEFAULT_COLOR.base_color}} /> 
+                <SafeAreaView style={ styles.container }>
+                    <Loader screenState={{isLoading:this.state.loading,color:DEFAULT_COLOR.base_color}} /> 
+                </SafeAreaView>
             )
         }else {  
         return(
@@ -458,7 +463,7 @@ class ProductListScreen extends Component {
                         })
                     } 
                     </View>
-                    {
+                    {/* {
                         this.state.ismore &&
                         <View style={CommonStyle.moreButtonWrap}>
                             <TouchableOpacity 
@@ -468,7 +473,7 @@ class ProductListScreen extends Component {
                             <CustomTextL style={CommonStyle.moreText}>더보기</CustomTextL>
                             </TouchableOpacity>
                         </View>
-                    }
+                    } */}
                     <View style={[CommonStyle.blankArea,{backgroundColor:DEFAULT_COLOR.default_bg_color}]}></View>
                     { 
                         this.state.moreLoading &&

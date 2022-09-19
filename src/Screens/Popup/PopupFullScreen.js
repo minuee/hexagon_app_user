@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {Platform,View,TouchableOpacity,StyleSheet,Dimensions,Animated,Image,PixelRatio} from "react-native";
 import Modal from 'react-native-modal';
-import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-community/async-storage';
 import {CheckBox} from 'react-native-elements';
 import 'moment/locale/ko'
@@ -89,7 +88,8 @@ class PopupFullScreen extends Component {
         )
     }
 
-    moveBannerDetail = async(item) => {        
+    moveBannerDetail = async(item) => {      
+        console.log('moveBannerDetail',item)  
         if ( item.popup_gubun === 'Notice') {
         }else{
             this.setState({loading:false});
@@ -112,6 +112,13 @@ class PopupFullScreen extends Component {
                     screenTitle: item.popup_title,
                     screenData:{...item,event_pk:item.target_pk,event_name:item.popup_title}
                 });
+            }else if ( item.inlink_type === 'CATEGORY') {
+                this.closePopUp()                
+                setTimeout(() => {
+                    this.props.screenProps.navigation.navigate('ProductListStack',{
+                        screenData:{...item,category_pk:item.target_pk,category_name : item.popup_title}
+                    });
+                }, 500);
             }else{
                
             }
@@ -144,9 +151,10 @@ class PopupFullScreen extends Component {
             <Modal 
                 onBackdropPress={()=>this.closePopUp()}
                 animationType="slide"
+                coverScreen={true}
                 transparent={true}
                 onRequestClose={() => this.closePopUp()}
-                style={{justifyContent: 'flex-end',margin: 0}}
+                style={{justifyContent: 'flex-end',margin: 0,padding:0}}
                 useNativeDriver={true}
                 animationInTiming={300}
                 animationOutTiming={300}
@@ -176,12 +184,12 @@ class PopupFullScreen extends Component {
                                             style={{minHeight:'100%',backgroundColor:'transparent',alignItems:'flex-start'}}
                                         >
                                             {this.renderImage(imageItem)}
-                                            <View style={styles.renderWrapStyle}>
+                                            {/* <View style={styles.renderWrapStyle}>
                                                 
                                                 <View style={styles.contentStyle}>
                                                     <CustomTextB style={styles.menuText} numberOfLines={2} ellipsizeMode={'tail'}>{imageItem.popup_title}</CustomTextB>
                                                 </View>
-                                            </View>
+                                            </View> */}
                                            
                                         </TouchableOpacity>
                                         )
@@ -223,18 +231,9 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems:'center',
         backgroundColor: "rgba(0,0,0,0.3)",
-        width: Dimensions.get("window").width,
-        height: Dimensions.get("window").height
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT
     },
-    modalTop : {
-        zIndex:10,
-        position:'absolute',top:10,left:0,width:SCREEN_WIDTH,
-        height:Platform.OS === 'ios' ? 80 : 50,
-        justifyContent:'center',
-        paddingLeft:10,
-        //backgroundColor:'#ff0000'
-    },
-
     imageWrapios : {
         width:'100%',height:'100%'
     },
@@ -251,7 +250,7 @@ const styles = StyleSheet.create({
     modalContainer: {
         width:SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        paddingTop: 16,
+        paddingTop: 0,
         backgroundColor: '#fff'
     },
     checkBoxWrap : {
@@ -275,10 +274,10 @@ const styles = StyleSheet.create({
         position:'absolute',
         height:100,
         width:SCREEN_WIDTH*0.9,
-        top:0,
+        top:10,
         left: 0,
         flexDirection:'row',
-        opacity:0.3
+        opacity:0.5
     },
     contentStyle: {
         flex:5,

@@ -43,14 +43,42 @@ class PopLayerOption extends Component {
             returnCode = await apiObject.API_getDetailDefault(this.props.screenProps,url,token);
             let optionList = [];
             if ( returnCode.code === '0000'  ) {
+                //console.log('returnCode.data.productDetail',returnCode.data.productDetail)
                 if ( returnCode.data.productDetail.each_price > 0) {  
-                    optionList.push({product_pk : productData.product_pk,unit_type : 'Each', quantity : productData.child.findIndex((info) => info.unit_type === 'Each') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Each')].quantity : 1,price : returnCode.data.productDetail.each_price,event_price : returnCode.data.productDetail.event_each_price,checked : productData.child.findIndex((info) => info.unit_type === 'Each') != -1 ? true : false})
+                    optionList.push({
+                        product_pk : productData.product_pk,
+                        unit_type : 'Each',
+                        quantity : productData.child.findIndex((info) => info.unit_type === 'Each') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Each')].quantity : 1,
+                        price : returnCode.data.productDetail.each_price,
+                        event_price : returnCode.data.productDetail.event_each_price,
+                        checked : productData.child.findIndex((info) => info.unit_type === 'Each') != -1 ? true : false,
+                        each_count : 1,
+                        each_price : returnCode.data.productDetail.each_price
+                    })
                 }
                 if ( returnCode.data.productDetail.box_price > 0) {
-                    optionList.push({product_pk : productData.product_pk,unit_type : 'Box', quantity : productData.child.findIndex((info) => info.unit_type_type === 'Box') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Box')].quantity : 1,price : returnCode.data.productDetail.box_price,event_price : returnCode.data.productDetail.event_box_price,checked : productData.child.findIndex((info) => info.unit_type === 'Box') != -1 ? true : false })
+                    optionList.push({
+                        product_pk : productData.product_pk,
+                        unit_type : 'Box', 
+                        quantity : productData.child.findIndex((info) => info.unit_type_type === 'Box') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Box')].quantity : 1,
+                        price : returnCode.data.productDetail.box_price,
+                        event_price : returnCode.data.productDetail.event_box_price,
+                        checked : productData.child.findIndex((info) => info.unit_type === 'Box') != -1 ? true : false,
+                        each_count : returnCode.data.productDetail.box_unit,
+                        each_price : parseInt(returnCode.data.productDetail.box_price/returnCode.data.productDetail.box_unit)
+                    })
                 }
                 if ( returnCode.data.productDetail.carton_price > 0) {
-                    optionList.push({product_pk : productData.product_pk,unit_type : 'Carton', quantity : productData.child.findIndex((info) => info.unit_type === 'Carton') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Carton')].quantity : 1,price : returnCode.data.productDetail.carton_price,event_price : returnCode.data.productDetail.event_carton_price,checked : productData.child.findIndex((info) => info.unit_type === 'Carton') != -1 ? true : false})
+                    optionList.push({
+                        product_pk : productData.product_pk,
+                        unit_type : 'Carton', 
+                        quantity : productData.child.findIndex((info) => info.unit_type === 'Carton') != -1 ? productData.child[productData.child.findIndex((info) => info.unit_type === 'Carton')].quantity : 1,
+                        price : returnCode.data.productDetail.carton_price,
+                        event_price : returnCode.data.productDetail.event_carton_price,
+                        checked : productData.child.findIndex((info) => info.unit_type === 'Carton') != -1 ? true : false,
+                        each_count : returnCode.data.productDetail.carton_unit,
+                        each_price : parseInt(returnCode.data.productDetail.carton_price/returnCode.data.productDetail.carton_unit)
+                    })
                 }
                 this.setState({
                     product_pk : productData.product_pk,
@@ -82,10 +110,14 @@ class PopLayerOption extends Component {
     setCartList = async(data) => {       
         try {
             let element = data[0];
-               
+            //console.log('element', data[0]);
             let initialValue = 0;  
             let initialValue2 = 0;
             let initialValue3 = 0;
+            let isHaveCarton = false;
+            let isHaveCartonPrice = 0;
+            let isHaveBox = false;
+            let isHaveBoxPrice = 0;
             var newChild = await element.child.map(function(obj){
                 let rObj = {};
                 rObj['event_price'] = obj.unit_type === 'Carton' ? element.event_carton_price : obj.unit_type === 'Box' ? element.event_box_price : element.event_each_price;
@@ -97,10 +129,24 @@ class PopLayerOption extends Component {
                 eachSoldCount = obj.unit_type === 'Each' ? obj.quantity : 0;
                 boxSoldCount = obj.unit_type === 'Box' ? obj.quantity : 0;
                 cartonSoldCount = obj.unit_type === 'Carton' ? obj.quantity : 0;
+                if ( obj.unit_type === 'Carton' ) {
+                    isHaveCarton =  true;
+                    isHaveCartonPrice = parseInt(element.carton_price / element.carton_unit);
+                    rObj['other_carton_price'] = isHaveCartonPrice;
+                }
+                if ( obj.unit_type === 'Box' ) {
+                    isHaveBox =  true;
+                    isHaveBoxPrice =  parseInt(element.box_price / element.box_unit);
+                    rObj['other_box_price'] = isHaveBoxPrice;
+                }
                 return rObj;
             });
             let returnData = {
                 ...element,
+                isHaveBox,
+                isHaveBoxPrice,
+                isHaveCarton,
+                isHaveCartonPrice,
                 eachSoldCount : eachSoldCount,
                 boxSoldCount : boxSoldCount,
                 cartonSoldCount : cartonSoldCount,
@@ -118,6 +164,57 @@ class PopLayerOption extends Component {
                     return acc+(cur.quantity*cur.event_price)
                 },initialValue3),
                 child : newChild
+            }
+            if ( isHaveCarton && isHaveCartonPrice > 0 ) {
+                returnData = {
+                    ...element,
+                    isHaveBox,
+                    isHaveBoxPrice,
+                    isHaveCarton,
+                    isHaveCartonPrice,
+                    eachSoldCount : eachSoldCount,
+                    boxSoldCount : boxSoldCount,
+                    cartonSoldCount : cartonSoldCount,
+                    id : element.product_pk,
+                    product_name : element.product_name,
+                    product_pk : element.product_pk,
+                    thumb_img : element.thumb_img,
+                    quantity : newChild.reduce(function(acc,cur) {
+                        return acc+cur.quantity
+                    },initialValue),
+                    totalPrice : newChild.reduce(function(acc,cur) {
+                        return cur.unit_type === 'Each' ? acc + cur.quantity * isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*isHaveCartonPrice*element.box_unit) : acc+(cur.quantity*cur.price)
+                    },initialValue2),
+                    eventTotalPrice : newChild.reduce(function(acc,cur) {
+                        return acc+(cur.quantity*cur.event_price)
+                    },initialValue3),
+                    child : newChild
+                }
+            }else if ( isHaveBox && isHaveBoxPrice > 0 ) {
+                returnData = {
+                    ...element,
+                    isHaveBox,
+                    isHaveBoxPrice,
+                    isHaveCarton,
+                    isHaveCartonPrice,
+                    eachSoldCount : eachSoldCount,
+                    boxSoldCount : boxSoldCount,
+                    cartonSoldCount : cartonSoldCount,
+                    id : element.product_pk,
+                    product_name : element.product_name,
+                    product_pk : element.product_pk,
+                    thumb_img : element.thumb_img,
+                    quantity : newChild.reduce(function(acc,cur) {
+                        return acc+cur.quantity
+                    },initialValue),
+                    totalPrice : newChild.reduce(function(acc,cur) {
+                        return cur.unit_type === 'Each' ? acc + cur.quantity * isHaveBoxPrice : acc+(cur.quantity*cur.price)
+                    },initialValue2),
+                    eventTotalPrice : newChild.reduce(function(acc,cur) {
+                        return acc+(cur.quantity*cur.event_price)
+                    },initialValue3),
+                    child : newChild
+                }
             }
             return returnData;
         }catch(e) {
@@ -140,6 +237,7 @@ class PopLayerOption extends Component {
             returnCode = await apiObject.API_registCommon(this.props,url,token,sendData);
             if ( returnCode.code === '0000'  ) {
                 let feedData = await this.setCartList(returnCode.data.cartList); 
+                //console.log('feedData',feedData)
                 let userCartCount = CommonUtil.isEmpty(returnCode.data.totalCount) ? 0 : returnCode.data.totalCount ;
                 this.props._fn_getUserCartCount(userCartCount);
                 this.props.screenState.closepopLayer(feedData);
@@ -155,7 +253,7 @@ class PopLayerOption extends Component {
     selectMember = async() =>  {
         let isCheck = this.state.optionList.some((info)=>info.checked === true);
         if ( isCheck ) {
-            let newChild = await this.state.optionList.filter((info)=> info.checked === true);
+            let newChild = this.state.optionList.filter((info)=> info.checked === true);
             this.registAddress(newChild)
         }else{
             Alert.alert(
@@ -189,6 +287,16 @@ class PopLayerOption extends Component {
             )
         }
     
+    }
+
+    renderDescption = (item) => {
+        return (
+            <View style={{flex:1}}>
+                <TextRobotoR style={styles.eventpriceText}>
+                    (수량:{CommonFunction.currencyFormat(item.each_count)}, 단가:{CommonFunction.currencyFormat(item.each_price)}원)
+                </TextRobotoR>                       
+            </View>
+        )
     }
 
     render() {
@@ -227,7 +335,7 @@ class PopLayerOption extends Component {
                         </View>
                         <View style={styles.formWarp}>
                         {
-                            this.state.optionList.map((item, index) => {  
+                            this.state.optionList.map((item, index) => { 
                             return (
                                 <View key={index} style={styles.itemWrap} >
                                     <TouchableOpacity style={styles.boxSubWrap} onPress={() => this.checkItem(index)}>
@@ -244,12 +352,11 @@ class PopLayerOption extends Component {
                                                 onPress={() => this.checkItem(index)}
                                             />
                                         </View>
-                                        <View style={styles.boxLeftWrap}>
-                                            
+                                        <View style={styles.boxLeftWrap}>                                            
                                             { item.event_price > 0 ?
                                                 <View style={[styles.unitWrap,{flexDirection:'row',alignItems:'center',justifyContent:'center'}]}>
                                                     <View style={{flex:1}}>
-                                                        <CustomTextR style={CommonStyle.dataText15}>{CommonFunction.replaceUnitType(item.unit_type)}</CustomTextR>
+                                                        <CustomTextR style={CommonStyle.dataText15}>{CommonFunction.replaceUnitType(item.unit_type)}{" "}</CustomTextR>
                                                     </View>
                                                     <View style={{flex:3}}>
                                                         <TextRobotoR style={CommonStyle.titleText}>
@@ -264,10 +371,15 @@ class PopLayerOption extends Component {
                                                 </View>
                                             :
                                                 <TextRobotoR style={CommonStyle.dataText}>
-                                                    {CommonFunction.replaceUnitType(item.unit_type)} 
+                                                    {CommonFunction.replaceUnitType(item.unit_type)}{" "}
                                                     {CommonFunction.currencyFormat(item.price)}원
                                                 </TextRobotoR> 
-                                            }                                   
+                                            } 
+                                            {
+                                                item.unit_type != 'Each' && (
+                                                    this.renderDescption(item)
+                                                )
+                                            }                                 
                                         </View>
                                     </TouchableOpacity>
                                 </View>
@@ -339,8 +451,7 @@ const styles = StyleSheet.create({
         flex:0.5,        
         justifyContent:'center',
         alignItems:'center',
-        marginRight:5,
-        paddingBottom:10
+        marginRight:5
     },
     boxLeftWrap : {
         flex:5,        

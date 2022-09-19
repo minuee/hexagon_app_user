@@ -125,14 +125,16 @@ class ArrivalScreen extends Component {
         let paddingToBottom = 1;
         paddingToBottom += event.nativeEvent.layoutMeasurement.height;                            
         if (event.nativeEvent.contentOffset.y + paddingToBottom >= event.nativeEvent.contentSize.height) {            
-            //this.scrollEndReach();
+            this.scrollEndReach();
         }
     }
     upButtonHandler = () => {        
         this.ScrollView.scrollTo({ x: 0,  animated: true });
     };
-    scrollEndReach = () => {       
-       
+    scrollEndReach = () => {     
+        if ( this.state.ismore && !this.state.moreLoading ) {
+            this.getBaseData(this.state.currentPage+1,true)
+        }
     }
     refreshingData = async() => {
         this.getBaseData(1,false,this.state.newArrivals)
@@ -526,7 +528,7 @@ class ArrivalScreen extends Component {
                         })
                     }
                     </View>
-                    {
+                   {/*  {
                         this.state.ismore &&
                         <View style={CommonStyle.moreButtonWrap}>
                             <TouchableOpacity 
@@ -536,7 +538,7 @@ class ArrivalScreen extends Component {
                             <CustomTextL style={CommonStyle.moreText}>더보기</CustomTextL>
                             </TouchableOpacity>
                         </View>
-                    }
+                    } */}
                     
                     <View style={[CommonStyle.blankArea,{backgroundColor:DEFAULT_COLOR.default_bg_color}]}></View>
                     { 

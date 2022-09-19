@@ -40,7 +40,7 @@ const CommonMyShop = (props) => {
                     <TouchableOpacity 
                         underlayColor="transparent"                        
                         onPress={() => _menu.show()} hitSlop={{left:20,right:20,bottom:10,top:10}}
-                        hitSlop={{left:10,right:10,bottom:10,top:10}}
+                        //hitSlop={{left:10,right:10,bottom:10,top:10}}
                         style={styles.cartWrap}
                     >
                         <View style={userCartCount > 9 ? CommonStyle.cartBigWrap : CommonStyle.cartWrap}>
@@ -89,17 +89,17 @@ const CommonMyShop = (props) => {
                         <View style={styles.menuItemWrap}>
                             <View style={styles.menuItemDataWrap}>
                                 <TouchableOpacity style={styles.menuSubWrap} onPress={()=>{props.navigation.navigate('MyOrderListStack');_menu.hide()}}>
-                                    <CustomTextL style={styles.menuSubTitle}>주문배송 <TextRobotoL style={styles.menuSubTitle2}>{userOrderingCount}</TextRobotoL></CustomTextL>
+                                    <CustomTextL style={styles.menuSubTitle}>주문배송 <TextRobotoL style={styles.menuSubTitle2}>{userOrderingCount > 10 ? '10+' : userOrderingCount}</TextRobotoL></CustomTextL>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.menuSubWrap} onPress={()=>{props.navigation.navigate('CartStack');_menu.hide()}}>
-                                    <CustomTextL style={styles.menuSubTitle}>장바구니 <TextRobotoL style={styles.menuSubTitle2}>{userCartCount}</TextRobotoL></CustomTextL>
+                                    <CustomTextL style={styles.menuSubTitle}>장바구니 <TextRobotoL style={styles.menuSubTitle2}>{userCartCount > 99 ? '99+' : userCartCount}</TextRobotoL></CustomTextL>
                                 </TouchableOpacity>
                                 <TouchableOpacity                                 
                                     style={styles.menuSubWrap2} 
                                     //activeOpacity={0.8}
                                     hitSlop={{left:10,right:200,bottom:10,top:10}}
                                     onPress={()=>{props.navigation.navigate('MyBookMarkStack');_menu.hide()}}>
-                                    <CustomTextL style={styles.menuSubTitle}>찜한상품 <TextRobotoL style={styles.menuSubTitle2}>{userZzimCount}</TextRobotoL></CustomTextL>
+                                    <CustomTextL style={styles.menuSubTitle}>찜한상품 <TextRobotoL style={styles.menuSubTitle2}>{userZzimCount > 99 ? '99+' : userZzimCount}</TextRobotoL></CustomTextL>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -107,14 +107,14 @@ const CommonMyShop = (props) => {
                 :                    
                     <MenuItem onPress={() => {_menu.hide()}} style={styles.menuItemCoverWrap3}>
                         <TouchableOpacity style={styles.menuSubWrapAndroid} onPress={()=>{props.navigation.navigate('MyOrderListStack');_menu.hide()}}>
-                            <CustomTextL style={styles.menuSubTitle}>주문배송 <TextRobotoL style={styles.menuSubTitle2}>{userOrderingCount}</TextRobotoL></CustomTextL>
+                            <CustomTextL style={styles.menuSubTitle}>주문배송 <TextRobotoL style={styles.menuSubTitle2}>{userOrderingCount > 10 ? '10+' : userOrderingCount}</TextRobotoL></CustomTextL>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.menuSubWrapAndroid} onPress={()=>{props.navigation.navigate('CartStack');_menu.hide()}}>
-                            <CustomTextL style={styles.menuSubTitle}>장바구니 <TextRobotoL style={styles.menuSubTitle2}>{userCartCount}</TextRobotoL></CustomTextL>
+                            <CustomTextL style={styles.menuSubTitle}>장바구니 <TextRobotoL style={styles.menuSubTitle2}>{userCartCount > 99 ? '99+' : userCartCount}</TextRobotoL></CustomTextL>
                         </TouchableOpacity>
                         <TouchableOpacity                                 
                             style={styles.menuSubWrapAndroid} onPress={()=>{props.navigation.navigate('MyBookMarkStack');_menu.hide()}}>
-                            <CustomTextL style={styles.menuSubTitle}>찜한상품 <TextRobotoL style={styles.menuSubTitle2}>{userZzimCount}</TextRobotoL></CustomTextL>
+                            <CustomTextL style={styles.menuSubTitle}>찜한상품 <TextRobotoL style={styles.menuSubTitle2}>{userZzimCount > 99 ? '99+' : userZzimCount}</TextRobotoL></CustomTextL>
                         </TouchableOpacity>
                     </MenuItem>
                 }

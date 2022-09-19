@@ -28,15 +28,11 @@ import CountDown from '../../Components/CountDown';
 
 
 const TodayTimeStamp = moment().unix();  // 서울
-const backImage1 = require('../../../assets/images/back_limit.png');
-const backImage2 = require('../../../assets/images/back_event.png');
-const backImage3 = require('../../../assets/images/back_termevent.png');
 const iconEvent = require('../../../assets/icons/icon_event.png');
 const iconEventterm = require('../../../assets/icons/icon_eventterm.png');
 const iconEventlimit = require('../../../assets/icons/icon_eventlimit.png');
 const ICON_CART = require('../../../assets/icons/icon_cart.png');
 const ICON_ZZIM = require('../../../assets/icons/icon_zzim.png');
-const ICON_BELL = require('../../../assets/icons/icon_bell.png');
 
 class RecommScreen extends Component {
     constructor(props) {
@@ -70,7 +66,7 @@ class RecommScreen extends Component {
             const token = this.props.userToken.apiToken;
             let sendData = null;
             returnCode = await apiObject.API_getPageList(this.props,url,token,sendData);          
-            //console.log('RecommScreen returnCode',returnCode.data.orderingcount)  
+            //console.log('RecommScreen returnCode',returnCode.data.my_orderhistory)  
             if ( returnCode.code === '0000'  ) {
                 this.setState({
                     myHistoryList : CommonUtil.isEmpty(returnCode.data.my_orderhistory) ? []: returnCode.data.my_orderhistory,
@@ -771,7 +767,7 @@ class RecommScreen extends Component {
                                         >
                                             <FastImage
                                                 source={{uri:DEFAULT_CONSTANTS.defaultImageDomain+item.event_img}}
-                                                resizeMode={FastImage.resizeMode.cover}
+                                                resizeMode={FastImage.resizeMode.contain}
                                                 style={{width:SCREEN_WIDTH*0.8,minHeight:120}}
                                             />
                                         </TouchableOpacity>
@@ -836,7 +832,7 @@ class RecommScreen extends Component {
                                                 <Image
                                                     source={{uri:DEFAULT_CONSTANTS.defaultImageDomain+item.thumb_img}}
                                                     resizeMode={"contain"}
-                                                    style={{width:'100%',minHeight:SCREEN_WIDTH/3,height:'100%'}}
+                                                    style={{width:SCREEN_WIDTH/3,height:SCREEN_WIDTH/3}}
                                                 />
                                                 :
                                                 <Image
@@ -851,7 +847,7 @@ class RecommScreen extends Component {
                                         </View>
                                         <View style={{padding:10}}>
                                             <CustomTextR style={[styles.menuText,{lineHeight:20}]} numberOfLines={2} ellipsizeMode={'tail'}>
-                                                {item.arrival_type === 'product' ? item.product_name : '[브랜드]'+item.product_name}
+                                                {item.arrival_type == 'product' ? item.product_name : '[브랜드]'+item.product_name}
                                             </CustomTextR>
                                             { ( item.arrival_type === 'product' && !CommonUtil.isEmpty(this.props.userToken) ) && this.renderPriceInfo(item)}
                                         </View>

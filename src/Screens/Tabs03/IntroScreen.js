@@ -99,7 +99,7 @@ class IntroScreen extends Component {
     }
 
     getData = async(searchKeyword,currentpage,morePage = false) => {
-        console.log('currentpage',currentpage)
+        this.setState({moreLoading:true})
         let returnCode = {code:9998};
         try {            
             const url = DEFAULT_CONSTANTS.apiAdminDomain + '/cms/product/list?search_word=' + searchKeyword + '&page=' + currentpage + '&paginate='+DefaultPaginate;
@@ -345,6 +345,25 @@ class IntroScreen extends Component {
         }  
     }
 
+    handleOnScroll (event) {             
+        if ( event.nativeEvent.contentOffset.y >= 200 ) {
+            this.setState({showTopButton : true}) 
+        }else{
+            this.setState({showTopButton : false}) 
+         }
+        let paddingToBottom = 1;
+        paddingToBottom += event.nativeEvent.layoutMeasurement.height;                            
+        if (event.nativeEvent.contentOffset.y + paddingToBottom >= event.nativeEvent.contentSize.height) {            
+            this.scrollEndReach();
+        }
+    }
+
+    scrollEndReach = () => {     
+        if ( this.state.ismore && !this.state.moreLoading ) {
+            this.getData(this.state.searchKeyword,this.state.currentpage+1,true)
+        }
+    }
+
     renderIcons = (idx, item ) => {
         return (
             item.is_soldout ? 
@@ -417,6 +436,7 @@ class IntroScreen extends Component {
                         showsVerticalScrollIndicator={false}
                         indicatorStyle={'white'}
                         scrollEventThrottle={16}
+                        onScroll={e => this.handleOnScroll(e)}
                         keyboardDismissMode={'on-drag'}
                         style={{width:'100%'}}
                     >
@@ -515,7 +535,7 @@ class IntroScreen extends Component {
                         </View>
                     </View>
                     }
-                    {
+                    {/* {
                         this.state.ismore &&
                         <View style={CommonStyle.moreButtonWrap}>
                             <TouchableOpacity 
@@ -525,7 +545,7 @@ class IntroScreen extends Component {
                             <CustomTextL style={CommonStyle.moreText}>더보기</CustomTextL>
                             </TouchableOpacity>
                         </View>
-                    }
+                    } */}
                     <View style={CommonStyle.blankArea}></View>
                     { 
                         this.state.moreLoading &&

@@ -10,7 +10,7 @@ const DEFAULT_CONSTANTS = getDEFAULT_CONSTANTS.DEFAULT_CONSTANTS;
 const DEFAULT_TEXT = getDEFAULT_CONSTANTS.DEFAULT_TEXT;
 const DEFAULT_COLOR = getDEFAULT_CONSTANTS.DEFAULT_COLOR;
 const {height: SCREEN_HEIGHT, width: SCREEN_WIDTH} = Dimensions.get('window');
-import {CustomTextR,CustomTextL, CustomTextB, CustomTextM, TextRobotoM,TextRobotoR} from '../../Components/CustomText';
+import {CustomTextR,CustomTextL, CustomTextB, CustomTextM, TextRobotoM,TextRobotoL,TextRobotoR} from '../../Components/CustomText';
 import CommonFunction from '../../Utils/CommonFunction';
 import CommonUtil from '../../Utils/CommonUtil';
 
@@ -28,6 +28,57 @@ class OrderDetail extends Component {
    
     UNSAFE_componentWillMount() {       
         
+    }
+
+    renderUnitPrice = (item,titem,tindex) => {
+        if ( item.isHaveCarton && item.isHaveCartonPrice > 0 ) {
+            if ( titem.unit_type === 'Each') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveCartonPrice)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+
+            }else if ( titem.unit_type === 'Box') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveCartonPrice*item.box_unit)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+            }else{
+                return (
+                    <TextRobotoL style={CommonStyle.dataText}>
+                        {CommonFunction.currencyFormat(titem.price)}{"원"}
+                    </TextRobotoL>
+                )
+            }
+        }else  if ( item.isHaveBox && item.isHaveBoxPrice > 0 ) {
+            if ( titem.unit_type === 'Each') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveBoxPrice)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+
+            }else{
+                return (
+                    <TextRobotoL style={CommonStyle.dataText}>
+                        {CommonFunction.currencyFormat(titem.price)}{"원"}
+                    </TextRobotoL>
+                )
+            }
+        }else{
+            return (
+                <TextRobotoL style={CommonStyle.dataText}>
+                    {CommonFunction.currencyFormat(titem.price)}
+                    <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                </TextRobotoL>
+            )
+
+        }
     }
 
     render() {
@@ -96,7 +147,9 @@ class OrderDetail extends Component {
                                             </View>
                                             :
                                             <View style={styles.unitWrap}>
-                                                <CustomTextR style={CommonStyle.dataText}>{CommonFunction.replaceUnitType(titem.unit_type)}({CommonFunction.currencyFormat(titem.price)}원)</CustomTextR>
+                                                <CustomTextR style={CommonStyle.dataText}>{CommonFunction.replaceUnitType(titem.unit_type)}
+                                                    ({this.renderUnitPrice(item,titem,tindex)})
+                                                </CustomTextR>
                                                 <CustomTextR style={CommonStyle.dataText}> 수량:{CommonFunction.currencyFormat(titem.quantity)}</CustomTextR>
                                             </View>
                                             }
@@ -369,6 +422,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',        
         borderBottomWidth:1,
         borderBottomColor : DEFAULT_COLOR.input_border_color
+    },
+    boxSubWrap2 : {
+        flex:1,
     },
     detailLeftWrap : {
         flex:1,

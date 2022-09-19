@@ -70,11 +70,6 @@ class CartScreen extends Component {
             let eachSoldCount = 0; 
             let boxSoldCount = 0;
             let cartonSoldCount = 0;
-            let isHaveCarton = false;
-            let isHaveCartonPrice = 0;
-            let isHaveBox = false;
-            let isHaveBoxPrice = 0;
-            //console.log('element',element); 
             let newChild = element.child.map(function(obj){
                 let rObj = {};
                 rObj['event_price'] = obj.unit_type === 'Carton' ? element.event_carton_price : obj.unit_type === 'Box' ? element.event_box_price : element.event_each_price;
@@ -86,97 +81,28 @@ class CartScreen extends Component {
                 eachSoldCount = obj.unit_type === 'Each' ? obj.quantity : 0;
                 boxSoldCount = obj.unit_type === 'Box' ? obj.quantity : 0;
                 cartonSoldCount = obj.unit_type === 'Carton' ? obj.quantity : 0;
-                if ( obj.unit_type === 'Carton' ) {
-                    isHaveCarton =  true;
-                    isHaveCartonPrice = parseInt(element.carton_price / element.carton_unit);
-                    rObj['other_carton_price'] = isHaveCartonPrice;
-                }
-                if ( obj.unit_type === 'Box' ) {
-                    isHaveBox =  true;
-                    isHaveBoxPrice =  parseInt(element.box_price / element.box_unit);
-                    rObj['other_box_price'] = isHaveBoxPrice;
-                }
                 return rObj;
-            });      
-            console.log('newChild',newChild); 
-            //console.log('isHaveBox',isHaveBox,isHaveBoxPrice); 
-            if ( isHaveCarton && isHaveCartonPrice > 0 ) {
-                returnArray.push({
-                    ...element,
-                    isHaveBox,
-                    isHaveBoxPrice,
-                    isHaveCarton,
-                    isHaveCartonPrice,
-                    eachSoldCount : eachSoldCount,
-                    boxSoldCount : boxSoldCount,
-                    cartonSoldCount : cartonSoldCount,
-                    id : element.product_pk,
-                    product_name : element.product_name,
-                    product_pk : element.product_pk,
-                    thumb_img : element.thumb_img,
-                    quantity : newChild.reduce(function(acc,cur) {
-                        return acc+cur.quantity
-                    },initialValue),
-                    totalPrice : newChild.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*isHaveCartonPrice*element.box_unit) : acc+(cur.quantity*cur.price)
-                    },initialValue2),
-                    eventTotalPrice : newChild.reduce(function(acc,cur) {
-                        return acc+(cur.quantity*cur.event_price)
-                    },initialValue3),
-                    child : newChild
-                })
-
-            }else if ( isHaveBox && isHaveBoxPrice > 0 ) {
-                returnArray.push({
-                    ...element,
-                    isHaveBox,
-                    isHaveBoxPrice,
-                    isHaveCarton,
-                    isHaveCartonPrice,
-                    eachSoldCount : eachSoldCount,
-                    boxSoldCount : boxSoldCount,
-                    cartonSoldCount : cartonSoldCount,
-                    id : element.product_pk,
-                    product_name : element.product_name,
-                    product_pk : element.product_pk,
-                    thumb_img : element.thumb_img,
-                    quantity : newChild.reduce(function(acc,cur) {
-                        return acc+cur.quantity
-                    },initialValue),
-                    totalPrice : newChild.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                    },initialValue2),
-                    eventTotalPrice : newChild.reduce(function(acc,cur) {
-                        return acc+(cur.quantity*cur.event_price)
-                    },initialValue3),
-                    child : newChild
-                })
-            }else{
-                returnArray.push({
-                    ...element,
-                    isHaveBox,
-                    isHaveBoxPrice,
-                    isHaveCarton,
-                    isHaveCartonPrice,
-                    eachSoldCount : eachSoldCount,
-                    boxSoldCount : boxSoldCount,
-                    cartonSoldCount : cartonSoldCount,
-                    id : element.product_pk,
-                    product_name : element.product_name,
-                    product_pk : element.product_pk,
-                    thumb_img : element.thumb_img,
-                    quantity : newChild.reduce(function(acc,cur) {
-                        return acc+cur.quantity
-                    },initialValue),
-                    totalPrice : newChild.reduce(function(acc,cur) {
-                        return acc+(cur.quantity*cur.price)
-                    },initialValue2),
-                    eventTotalPrice : newChild.reduce(function(acc,cur) {
-                        return acc+(cur.quantity*cur.event_price)
-                    },initialValue3),
-                    child : newChild
-                })
-            }
+            });            
+            returnArray.push({
+                ...element,
+                eachSoldCount : eachSoldCount,
+                boxSoldCount : boxSoldCount,
+                cartonSoldCount : cartonSoldCount,
+                id : element.product_pk,
+                product_name : element.product_name,
+                product_pk : element.product_pk,
+                thumb_img : element.thumb_img,
+                quantity : newChild.reduce(function(acc,cur) {
+                    return acc+cur.quantity
+                },initialValue),
+                totalPrice : newChild.reduce(function(acc,cur) {
+                    return acc+(cur.quantity*cur.price)
+                },initialValue2),
+                eventTotalPrice : newChild.reduce(function(acc,cur) {
+                    return acc+(cur.quantity*cur.event_price)
+                },initialValue3),
+                child : newChild
+            })
         });         
         this.setState({cartArray : returnArray,moreLoading:false,loading:false});
     }
@@ -242,7 +168,7 @@ class CartScreen extends Component {
 
     removeActionCarts = async(item = null, idx = null) => {
         this.setState({moreLoading:true})
-        let targetArray = this.state.selectedArray.map(function (info) {
+        let targetArray = await this.state.selectedArray.map(function (info) {
             return {product_pk : info.product_pk};
         });
         if ( !CommonUtil.isEmpty(item) ) {
@@ -250,7 +176,7 @@ class CartScreen extends Component {
         }
         let returnCode = await this.deleteCartArray(targetArray);
         if ( returnCode ) {
-            let returnArray = this.state.cartArray.filter((info) => info.checked !== true); 
+            let returnArray = await this.state.cartArray.filter((info) => info.checked !== true); 
             setTimeout(
                 () => {            
                     this.setState({
@@ -302,7 +228,7 @@ class CartScreen extends Component {
                     nullCount++;
                 }
             })
-            //console.log('nullCount',  nullCount)
+            console.log('nullCount',  nullCount)
             if ( nullCount > 0 ) {
                 CommonFunction.fn_call_toast('최소 1개이상 수량선택을 해주세요',2000);
                 return;
@@ -328,8 +254,8 @@ class CartScreen extends Component {
     }
     removeCart = async(item,idx) => {
         this.setState({moreLoading:true})
-        let resetArray = this.state.cartArray.filter((info) => info.id !== item.id);
-        let returnArray = resetArray.filter((info) => info.checked === true); 
+        let resetArray = await this.state.cartArray.filter((info) => info.id !== item.id);
+        let returnArray = await resetArray.filter((info) => info.checked === true); 
         await this.calTotalAmount(returnArray);
         this.setState({cartArray : resetArray })
     }
@@ -350,7 +276,7 @@ class CartScreen extends Component {
     }
 
     resetSelectedArray = async() => {        
-        let returnArray = this.state.cartArray.filter((info) => info.checked === true); 
+        let returnArray = await this.state.cartArray.filter((info) => info.checked === true); 
         this.setState({selectedArray : returnArray });
         return returnArray;
     }
@@ -360,7 +286,7 @@ class CartScreen extends Component {
         let cart_pk = this.state.cartArray[idx].child[tidx].cart_pk;       
         let returnCode = await this.deleteCartEach(cart_pk);        
         if ( returnCode ) {
-            let newOptions = await this.state.cartArray[idx].child.filter((info,index) => info.unit_type !== item.unit_type); 
+            let newOptions = await this.state.cartArray[idx].child.filter((info,index) => index !== tidx); 
             let initialValue = 0;
             this.state.cartArray[idx].child = newOptions;
             this.state.cartArray[idx].totalPrice = newOptions.reduce(function(acc,cur) {
@@ -368,7 +294,7 @@ class CartScreen extends Component {
             },initialValue);
             let selectedArray = await this.resetSelectedArray()
             let returnArray = [];
-            selectedArray.forEach(function(element,index,array){       
+            await selectedArray.forEach(function(element,index,array){       
                 let initialValue = 0;  
                 let initialValue2 = 0;  
                 let initialValue3 = 0;  
@@ -444,31 +370,20 @@ class CartScreen extends Component {
 
     }
     btnOrderCount = async(mode,item,index,tindex, val = 0) => {
-        //console.log('btnOrderCount',mode,val)
+        console.log('btnOrderCount',mode,val)
         let orderCount = this.state.cartArray[index].child[tindex].quantity;
         let eventStock = this.state.cartArray[index].child[tindex].event_stock;
         let event_price = this.state.cartArray[index].child[tindex].event_price;
         let initialValue = 0;  
         let initialValue2 = 0;  
-        const parentData = this.state.cartArray[index];
         if ( mode === 'direct' ) {            
                 this.setState({moreLoading:true})             
                 this.state.cartArray[index].child[tindex].quantity = parseInt(val*1);
                 let returnCode = await  this.updateQuantity(item,parseInt(val*1));
                 if (returnCode )  {
-                    if ( parentData.isHaveCarton && parentData.isHaveCartonPrice > 0 ) {
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*parentData.isHaveCartonPrice*parentData.box_unit) : acc+(cur.quantity*cur.price)
-                        },initialValue);
-                    }else if ( parentData.isHaveBox && parentData.isHaveBoxPrice > 0 ) {
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                        },initialValue);
-                    }else{
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return acc+(cur.quantity*cur.price)
-                        },initialValue);
-                    }
+                    this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
+                        return acc+(cur.quantity*cur.price)
+                    },initialValue);
                     this.state.cartArray[index].eventTotalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
                         return acc+(cur.quantity*cur.event_price)
                     },initialValue2);
@@ -481,20 +396,9 @@ class CartScreen extends Component {
                 this.state.cartArray[index].child[tindex].quantity = orderCount -1;
                 let returnCode = await  this.updateQuantity(item,orderCount -1);
                 if (returnCode )  {
-                    if ( parentData.isHaveCarton && parentData.isHaveCartonPrice > 0 ) {
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*parentData.isHaveCartonPrice*parentData.box_unit) : acc+(cur.quantity*cur.price)
-                        },initialValue);
-
-                    }else if ( parentData.isHaveBox && parentData.isHaveBoxPrice > 0 ) {
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                        },initialValue);
-                    }else {
-                        this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                            return acc+(cur.quantity*cur.price)
-                        },initialValue);
-                    }
+                    this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
+                        return acc+(cur.quantity*cur.price)
+                    },initialValue);
                     this.state.cartArray[index].eventTotalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
                         return acc+(cur.quantity*cur.event_price)
                     },initialValue2);
@@ -511,20 +415,9 @@ class CartScreen extends Component {
             this.state.cartArray[index].child[tindex].quantity = orderCount+1;
             let returnCode2 = await this.updateQuantity(item,orderCount+1);
             if ( returnCode2 )  {
-                if ( parentData.isHaveCarton && parentData.isHaveCartonPrice > 0 ) {
-                    this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*parentData.isHaveCartonPrice*parentData.box_unit) : acc+(cur.quantity*cur.price)
-                    },initialValue);
-                }else if ( parentData.isHaveBox && parentData.isHaveBoxPrice > 0 ) {
-                    this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                    },initialValue);
-
-                }else{
-                    this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
-                        return acc+(cur.quantity*cur.price)
-                    },initialValue);
-                }                
+                this.state.cartArray[index].totalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
+                    return acc+(cur.quantity*cur.price)
+                },initialValue);
                 this.state.cartArray[index].eventTotalPrice = this.state.cartArray[index].child.reduce(function(acc,cur) {
                     return acc+(cur.quantity*cur.event_price)
                 },initialValue2);
@@ -532,7 +425,7 @@ class CartScreen extends Component {
         }
          
         if ( this.state.selectedArray.length > 0 ) {            
-            let returnArray = this.state.cartArray.filter((info) => info.checked === true);
+            let returnArray = await this.state.cartArray.filter((info) => info.checked === true);
             await this.calTotalAmount(returnArray);
         }else{
             this.setState({moreLoading :false})
@@ -569,28 +462,18 @@ class CartScreen extends Component {
             this.setState({allChecked : false})
         }else{
             let targetArray = this.state.cartArray.filter((info) =>  info.is_soldout === false );
-            targetArray.forEach(function(element,index,array){       
+            await targetArray.forEach(function(element,index,array){       
                 let initialValue = 0;  
                 let initialValue2 = 0;  
                 let initialValue3 = 0;  
-                let newTotalPrice = element.child.reduce(function(acc,cur) {
-                    return acc+(cur.quantity*cur.price)
-                },initialValue2)
-                if ( element.isHaveCarton && element.isHaveCartonPrice > 0 ) {
-                    newTotalPrice = element.child.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * element.isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*element.isHaveCartonPrice*element.box_unit) : acc+(cur.quantity*cur.price)
-                    },initialValue2)
-                }else if ( element.isHaveBox && element.isHaveBoxPrice > 0 ) {
-                    newTotalPrice = element.child.reduce(function(acc,cur) {
-                        return cur.unit_type === 'Each' ? acc + cur.quantity * element.isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                    },initialValue2)
-                }
                 returnArray.push({
                     ...element,
                     quantity : element.child.reduce(function(acc,cur) {
                         return acc+cur.quantity
                     },initialValue),
-                    totalPrice : newTotalPrice,
+                    totalPrice : element.child.reduce(function(acc,cur) {
+                        return acc+(cur.quantity*cur.price)
+                    },initialValue2),
                     eventTotalPrice : element.child.reduce(function(acc,cur) {
                         return acc+(cur.quantity*cur.event_price)
                     },initialValue3),
@@ -684,7 +567,7 @@ class CartScreen extends Component {
         let selectedDeliveryAmount = returnArray.length === 0 ? 0 :  await this.setDeliveryCost(selectedTotalAmount-selectedTotalDiscount);
         let seletedSettleAmount = selectedTotalAmount + selectedDeliveryAmount - selectedTotalDiscount;
         //console.log('selectedRewardAmount',selectedRewardAmount);
-        this.setState({
+        await this.setState({
             selectedArray : returnArray,
             selectedTotalAmount : selectedTotalAmount,
             selectedRewardAmount : selectedRewardAmount,
@@ -702,28 +585,17 @@ class CartScreen extends Component {
         this.setState({moreLoading:true});
         let initialValue = 0;  
         let initialValue2 = 0;  
-        let initialValue3 = 0;    
-        const parentData = this.state.cartArray[index];   
+        let initialValue3 = 0;       
         if ( CommonUtil.isEmpty(item.checked) || item.checked === false) {
             let returnArray = this.state.selectedArray;
-            let newTotalPrice = item.child.reduce(function(acc,cur) {
-                return acc+(cur.quantity*cur.price)
-            },initialValue2)
-            if ( parentData.isHaveCarton && parentData.isHaveCartonPrice > 0 ) {
-                newTotalPrice = item.child.reduce(function(acc,cur) {
-                    return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveCartonPrice :  cur.unit_type === 'Box' ? acc+(cur.quantity*parentData.isHaveCartonPrice*parentData.box_unit) : acc+(cur.quantity*cur.price)
-                },initialValue2)
-            }else if ( parentData.isHaveBox && parentData.isHaveBoxPrice > 0 ) {
-                newTotalPrice = item.child.reduce(function(acc,cur) {
-                    return cur.unit_type === 'Each' ? acc + cur.quantity * parentData.isHaveBoxPrice : acc+(cur.quantity*cur.price)
-                },initialValue2)
-            }
-            returnArray.push({
+            await returnArray.push({
                 ...item,
                 quantity : item.child.reduce(function(acc,cur) {
                     return acc+cur.quantity
                 },initialValue),
-                totalPrice : newTotalPrice,
+                totalPrice : item.child.reduce(function(acc,cur) {
+                    return acc+(cur.quantity*cur.price)
+                },initialValue2),
                 eventTotalPrice : item.child.reduce(function(acc,cur) {
                     return acc+(cur.quantity*cur.event_price)
                 },initialValue3),
@@ -734,7 +606,7 @@ class CartScreen extends Component {
             await this.calTotalAmount(returnArray);
         }else{
             this.setState({allChecked : false })
-            let returnArray = this.state.selectedArray.filter((info) => info.id !== item.id); 
+            let returnArray = await this.state.selectedArray.filter((info) => info.id !== item.id); 
             this.state.cartArray[index].checked = false;
             await this.calTotalAmount(returnArray);
         }
@@ -742,7 +614,7 @@ class CartScreen extends Component {
 
     openOptionSet = async(item,idx) => {        
         let reitem = {...item,product_pk : item.product_pk}
-        this.setState({
+        await this.setState({
             optionProductIndex : idx,
             optionProduct : reitem,
         })
@@ -750,7 +622,7 @@ class CartScreen extends Component {
     }
 
     closepopLayer = async(arr=null) => {
-        //console.log('closepopLayer',arr)
+        console.log('closepopLayer',arr)
         if ( !CommonUtil.isEmpty(arr)) {
             this.state.cartArray[this.state.optionProductIndex] = arr;
             await this.setAllCheck(true);
@@ -775,78 +647,6 @@ class CartScreen extends Component {
         }
     }
 
-    renderUnitPrice = (item,titem,tindex) => {
-        if ( item.isHaveCarton && item.isHaveCartonPrice > 0 ) {
-            if ( titem.unit_type === 'Each') {
-                return (
-                    <View style={styles.unitWrap}>
-                        <TextRobotoB style={[CommonStyle.dataText,CommonStyle.fontStrike,{fontSize:11,color:'#ccc'}]}>
-                            {CommonFunction.currencyFormat(titem.price)}{"원"}
-                        </TextRobotoB>
-                        <TextRobotoB style={[CommonStyle.dataText,{lineHeight:16}]}>
-                            {CommonFunction.currencyFormat(item.isHaveCartonPrice)}
-                            <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
-                        </TextRobotoB>
-                    </View>
-                )
-
-            }else if ( titem.unit_type === 'Box') {
-                return (
-                    <View style={styles.unitWrap}>
-                        <TextRobotoB style={[CommonStyle.dataText,CommonStyle.fontStrike,{fontSize:11,color:'#ccc'}]}>
-                            {CommonFunction.currencyFormat(titem.price)}{"원"}
-                        </TextRobotoB>
-                        <TextRobotoB style={[CommonStyle.dataText,{lineHeight:16}]}>
-                            {CommonFunction.currencyFormat(item.isHaveCartonPrice*item.box_unit)}
-                            <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
-                        </TextRobotoB>
-                    </View>
-                )
-            }else{
-                return (
-                    <View style={styles.unitWrap}>
-                        <TextRobotoB style={CommonStyle.dataText}>
-                            {CommonFunction.currencyFormat(titem.price)}{"원"}
-                        </TextRobotoB>
-                    </View>
-                )
-            }
-        }else  if ( item.isHaveBox && item.isHaveBoxPrice > 0 ) {
-            if ( titem.unit_type === 'Each') {
-                return (
-                    <View style={styles.unitWrap}>
-                        <TextRobotoB style={[CommonStyle.dataText,CommonStyle.fontStrike,{fontSize:11,color:'#ccc'}]}>
-                            {CommonFunction.currencyFormat(titem.price)}{"원"}
-                        </TextRobotoB>
-                        <TextRobotoB style={[CommonStyle.dataText,{lineHeight:16}]}>
-                            {CommonFunction.currencyFormat(item.isHaveBoxPrice)}
-                            <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
-                        </TextRobotoB>
-                    </View>
-                )
-
-            }else{
-                return (
-                    <View style={styles.unitWrap}>
-                        <TextRobotoB style={CommonStyle.dataText}>
-                            {CommonFunction.currencyFormat(titem.price)}{"원"}
-                        </TextRobotoB>
-                    </View>
-                )
-            }
-        }else{
-            return (
-                <View style={styles.unitWrap}>
-                    <TextRobotoB style={CommonStyle.dataText}>
-                        {CommonFunction.currencyFormat(titem.price)}
-                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
-                    </TextRobotoB>
-                </View>
-            )
-
-        }
-    }
-
     moveDetail = (item) => {
         this.props.navigation.navigate('ProductDetailStack',{
             screenData:item
@@ -854,7 +654,7 @@ class CartScreen extends Component {
     }
     
     togglePanel = () => {      
-        //console.log('togglePanel')  
+        console.log('togglePanel')  
         if ( this.state.toggleStatus ) {
             this._panel.hide();
             this.setState({toggleStatus:false})
@@ -966,7 +766,7 @@ class CartScreen extends Component {
                                         </View>
                                         <View style={styles.checkboxRightWrap}>
                                             <View style={styles.commonTitleWarp}>
-                                                <CustomTextR style={CommonStyle.titleText15} numberOfLines={1} ellipsizeMode={'tail'}>
+                                                <CustomTextR style={CommonStyle.titleText14} numberOfLines={1} ellipsizeMode={'tail'}>
                                                     {item.product_name} {item.is_soldout == true && <CustomTextR style={[CommonStyle.titleText,{color:'#ff0000'}]}>(품절)</CustomTextR>} 
                                                 </CustomTextR>
                                                 <TouchableOpacity 
@@ -1005,9 +805,7 @@ class CartScreen extends Component {
                                                 return (
                                                 <View style={styles.boxSubWrap2} key={tindex}>
                                                     <View style={{width:40,justifyContent:'center',alignItems:'center'}}>
-                                                        <CustomTextR style={CommonStyle.dataText}>
-                                                            {CommonFunction.replaceUnitType(titem.unit_type)} 
-                                                        </CustomTextR>
+                                                        <CustomTextR style={CommonStyle.dataText}>{CommonFunction.replaceUnitType(titem.unit_type)} </CustomTextR>
                                                     </View>
                                                     { 
                                                         titem.event_price > 0  ?
@@ -1021,7 +819,12 @@ class CartScreen extends Component {
                                                             </TextRobotoR> 
                                                         </View>
                                                         :
-                                                        this.renderUnitPrice(item,titem,tindex)
+                                                        <View style={styles.unitWrap}>
+                                                            <TextRobotoB style={CommonStyle.dataText}>
+                                                                {CommonFunction.currencyFormat(titem.price)}
+                                                                <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                                                            </TextRobotoB>
+                                                        </View>
                                                     }
                                                     <View style={styles.numberWrap}>
                                                         <TouchableOpacity onPress={()=>this.btnOrderCount('minus',titem,index,tindex)}>

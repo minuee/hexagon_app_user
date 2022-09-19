@@ -113,12 +113,12 @@ class SlideBanner extends React.Component {
                         });break;
                     case 'CATEGORY' : 
                         this.props.screenProps.navigation.navigate('ProductListStack',{
-                            screenData:{...item,category_pk:item.target_pk,category_name:'ddddd'}
+                            screenData:{...item,category_pk:item.target_pk,category_name:item.title}
                         });break;
                     case 'EVENT' : 
                         this.props.screenProps.navigation.navigate('EventProductStack',{
                             screenTitle: item.title,
-                            screenData:{...item,event_pk:item.target_pk,event_name:'ddddd'}
+                            screenData:{...item,event_pk:item.target_pk,event_name:item.title}
                         });break;
                 }
             }
@@ -205,7 +205,7 @@ class SlideBanner extends React.Component {
                             return (
                                 <TouchableOpacity 
                                     key={index} 
-                                    onPress= {()=> this.moveDetail()}
+                                    onPress= {()=> this.moveDetail(imageItem.title)}
                                     style={{flex:1}}
                                 >
                                     {this.renderImage(imageItem)}

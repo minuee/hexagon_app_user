@@ -84,7 +84,7 @@ class App extends React.PureComponent {
            // console.log('url',url) 
             const token = null;
             returnCode = await apiObject.API_getCommonCode(url,token);          
-            //console.log('returnCode',returnCode)   
+            //console.log('returnCode',returnCode.data.codebank)   
             if ( returnCode.code === '0000'  ) {
                 await  AsyncStorage.setItem('BankCode',JSON.stringify(returnCode.data.codebank) );   
                 await  AsyncStorage.setItem('CommonCode',JSON.stringify(returnCode.data.common) );  
@@ -127,7 +127,7 @@ class App extends React.PureComponent {
                 password : token.user_pw
             }
             returnCode = await apiObject.API_authLogin(url,sendData);   
-            console.log('loginActio222n',returnCode)       
+            //console.log('loginActio222n',returnCode)       
             if ( returnCode.code === '0000'  ) {
                 this.setLoginToken(returnCode.token,token.user_pw);
             }
@@ -142,7 +142,7 @@ class App extends React.PureComponent {
         let deviceModel = DeviceInfo.getModel();
         let uuid =  DEFAULT_CONSTANTS.appID + CryptoJS.MD5(makeUUID).toString();
         const autoLoginData = await AsyncStorage.getItem('autoLoginData');
-        console.log('autoLoginData',autoLoginData)
+        //console.log('autoLoginData',autoLoginData)
         if(!CommonUtil.isEmpty(autoLoginData) ) {
             await this.loginAction(JSON.parse(autoLoginData))
         }  
@@ -184,7 +184,7 @@ class App extends React.PureComponent {
         
         //백그라운드에서 푸시를 받으면 호출됨 
         messaging().setBackgroundMessageHandler(async remoteMessage => {
-            console.log('Message handled in the background!2', remoteMessage);
+            //console.log('Message handled in the background!2', remoteMessage);
           
             const { title, body } = remoteMessage.notification;
             const { routeIdx, routeName } = remoteMessage.data;
@@ -202,8 +202,8 @@ class App extends React.PureComponent {
         const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
         if (enabled) {
             const fcmToken = await messaging().getToken();
-            console.log('fcm token:', fcmToken,Platform.OS);
-            console.log('Authorization status:', authStatus, Platform.OS);   
+            //console.log('fcm token:', fcmToken,Platform.OS);
+            //console.log('Authorization status:', authStatus, Platform.OS);   
             if ( !CommonUtil.isEmpty(fcmToken) ) {
                 this.setFcmTokenToDataBase(fcmToken,Platform.OS,this.state.thisUUID)
             }

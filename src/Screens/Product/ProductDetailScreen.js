@@ -2,15 +2,14 @@ import React, { Component } from 'react';
 import {SafeAreaView,ScrollView,View,StyleSheet,Animated,Dimensions,PixelRatio,TouchableOpacity,Image as NativeImage,Linking,Alert,ActivityIndicator} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 Icon.loadFont();
-import { WebView } from 'react-native-webview';
+import Modal from 'react-native-modal';
 import {connect} from 'react-redux';
 import ActionCreator from '../../Ducks/Actions/MainActions';
 import FastImage from 'react-native-fast-image';
 import {Overlay,CheckBox} from 'react-native-elements';
 import Image from 'react-native-image-progress';
-import Progress from 'react-native-progress/Bar';
-import Icon2 from 'react-native-vector-icons/Entypo';
-Icon2.loadFont();
+
+import ImageViewer from 'react-native-image-zoom-viewer';
 //공통상수 필요에 의해서 사용
 import  * as getDEFAULT_CONSTANTS   from '../../Constants';
 import CommonStyle from '../../Style/CommonStyle';
@@ -18,7 +17,7 @@ const DEFAULT_CONSTANTS = getDEFAULT_CONSTANTS.DEFAULT_CONSTANTS;
 const DEFAULT_TEXT = getDEFAULT_CONSTANTS.DEFAULT_TEXT;
 const DEFAULT_COLOR = getDEFAULT_CONSTANTS.DEFAULT_COLOR;
 const {height: SCREEN_HEIGHT, width: SCREEN_WIDTH} = Dimensions.get('window');
-import {CustomTextR, CustomTextB, TextRobotoB,TextRobotoM,TextRobotoR} from '../../Components/CustomText';
+import {CustomTextR, CustomTextB, TextRobotoB,TextRobotoM,TextRobotoR,CustomTextL} from '../../Components/CustomText';
 import CommonFunction from '../../Utils/CommonFunction';
 import CommonUtil from '../../Utils/CommonUtil';
 import Loader from '../../Utils/Loader';
@@ -26,8 +25,8 @@ import CustomAlert from '../../Components/CustomAlert';
 import { Platform } from 'react-native';
 const CHECKNOX_OFF = require('../../../assets/icons/checkbox_off.png');
 const CHECKNOX_ON = require('../../../assets/icons/checkbox_on.png');
+const HEADER_CLOSE_IMAGE = require('../../../assets/icons/btn_close.png');
 import { apiObject } from "../Apis";
-import ScalableImage from '../../Utils/ScalableImage';
 
 const HEADER_BLANK = 50;
 const ChangeLimitY = SCREEN_HEIGHT*0.8;
@@ -58,6 +57,10 @@ class ProductDetailScreen extends Component {
             detail_img3_height : 0,
             detail_img4_width : 0,
             detail_img4_height : 0,
+
+            thisImages : [],
+            imageIndex: 0,
+            isImageViewVisible: false,
         }
     }
 
@@ -182,18 +185,23 @@ class ProductDetailScreen extends Component {
         if ( !CommonUtil.isEmpty( data.detail_img1)) {
             const img1 = DEFAULT_CONSTANTS.defaultImageDomain+data.detail_img1;
             await NativeImage.getSize(img1, (width, height) => { 
-                console.log(width + ' - ' + height); 
+                console.log('ddd0',width + ' - ' + height); 
                 detail_img1_height = height;
                 detail_img1_width = width;
+                this.setState({
+                    detail_img1_height : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width
+                })
             });
             count++;
         }
         if ( !CommonUtil.isEmpty( data.detail_img2)) {
             const img2 = DEFAULT_CONSTANTS.defaultImageDomain+data.detail_img2;
-            await NativeImage.getSize(img2, (width, height) => { 
-                console.log(width + ' - ' + height); 
+            await NativeImage.getSize(img2, (width, height) => {                 
                 detail_img2_height = height;
                 detail_img2_width = width;
+                this.setState({
+                    detail_img2_height : (SCREEN_WIDTH-20) * detail_img2_height/detail_img2_width
+                })
             });
             count++;
         }
@@ -203,6 +211,9 @@ class ProductDetailScreen extends Component {
                 console.log(width + ' - ' + height); 
                 detail_img3_height = height;
                 detail_img3_width = width;
+                this.setState({
+                    detail_img3_height : (SCREEN_WIDTH-20) * detail_img3_height/detail_img3_width
+                })
             });
             count++;
         }
@@ -212,23 +223,30 @@ class ProductDetailScreen extends Component {
                 console.log(width + ' - ' + height); 
                 detail_img4_height = height;
                 detail_img4_width = width;
+                this.setState({
+                    detail_img4_height : (SCREEN_WIDTH-20) * detail_img4_height/detail_img4_width
+                })
             });
             count++;
         }
         
-        if ( count > 0 ) {
-
-            console.log('ddd1',detail_img1_height); 
-            console.log('ddd1',detail_img1_width); 
-            console.log('ddd2',(SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width); 
-            this.setState({
-                detail_img1_height : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width,
-                detail_img2_height : (SCREEN_WIDTH-20) * detail_img2_height/detail_img2_width,
-                detail_img3_height : (SCREEN_WIDTH-20) * detail_img3_height/detail_img3_width,
-                detail_img4_height : (SCREEN_WIDTH-20) * detail_img4_height/detail_img4_width,
-                moreLoading : false,
-                loading : false
-            })
+        if ( count > 0 && detail_img1_height != 0 ) {
+            
+            setTimeout(() => {
+                console.log('ddd1',Platform.OS, detail_img1_height); 
+                console.log('ddd2',detail_img1_width); 
+                console.log('ddd3',(SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width); 
+                this.setState({
+                    detail_img1_height : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width,
+                    detail_img2_height : (SCREEN_WIDTH-20) * detail_img2_height/detail_img2_width,
+                    detail_img3_height : (SCREEN_WIDTH-20) * detail_img3_height/detail_img3_width,
+                    detail_img4_height : (SCREEN_WIDTH-20) * detail_img4_height/detail_img4_width,
+                    moreLoading : false,
+                    loading : false
+                })
+            }, 1200);
+            
+            
         }else{
             this.setState({
                 moreLoading : false,
@@ -467,21 +485,176 @@ class ProductDetailScreen extends Component {
 
     }
 
+    enterCount = () => {
+        return (            
+            this.state.productData.is_soldout ? 
+            <View style={styles.defaultWrap}>
+                <View style={styles.scrollFooterLeftWrap2}>
+                    <CustomTextB style={CommonStyle.scrollFooterText}>품절된 상품입니다.</CustomTextB>
+                </View>
+                <View style={styles.renderIconDataWrap}>
+                    <TouchableOpacity style={styles.renderIconData} onPress={()=>this.registAlarm(this.state.productData)}>
+                        <Icon name="bells" size={16} color="#fff" />
+                        <CustomTextR style={styles.menuTextWhite}> 입고알림</CustomTextR>  
+                    </TouchableOpacity>
+                    {
+                        this.state.productData.measure > 0 &&
+                        <TouchableOpacity style={styles.renderIconData} onPress={()=>this.moveDetail3(this.state.productData)}>
+                            <Icon name="sync" size={16} color="#fff" />
+                            <CustomTextR style={styles.menuTextWhite}> 대체상품</CustomTextR>  
+                        </TouchableOpacity>
+                    }
+                </View>
+            </View>
+            :
+            <View>                            
+            { 
+                this.state.option.map((titem, tindex) => {  
+                    let isIndexOf = this.state.selectedArray.findIndex(                
+                        info => ( info.id === titem.id )
+                    ); 
+                    return (
+                    <View style={[styles.defaultWrap,{flexDirection:'row'}]} key={tindex}>
+                        <View style={styles.checkboxLeftWrap}>
+                            <CheckBox 
+                                iconType={'FontAwesome'}
+                                checkedIcon={<NativeImage source={CHECKNOX_ON} resizeMode='contain' style={CommonStyle.checkboxIcon} />}
+                                uncheckedIcon={<NativeImage source={CHECKNOX_OFF} resizeMode='contain' style={CommonStyle.checkboxIcon} />}
+                                checkedColor={DEFAULT_COLOR.base_color}
+                                checked={isIndexOf != -1 ? true : false}
+                                size={CommonUtil.dpToSize(15)}                                    
+                                onPress={() => this.checkItem(tindex,titem)}
+                            />
+                        </View>
+                        <View style={styles.bottomBoxLeftSubWrap} >
+                            <View style={{flex:1,justifyContent:'center',paddingVertical:5}}>
+                                
+                                { 
+                                    titem.event_price > 0 ?
+                                    <>
+                                        <View style={styles.unitWrap}>
+                                            <CustomTextB style={CommonStyle.dataText}>{titem.unit}</CustomTextB>
+                                            <View style={styles.percentWrap}>
+                                                <TextRobotoR style={styles.salesText2}>
+                                                    {Math.round(100-(titem.event_price /titem.price*100))}%
+                                                </TextRobotoR>
+                                            </View>
+                                        </View>
+                                        <TextRobotoB style={CommonStyle.dataText}>
+                                            {CommonFunction.currencyFormat(titem.event_price)}
+                                            <CustomTextR style={CommonStyle.dataText}>{"원  "}</CustomTextR>
+                                            <TextRobotoR style={[CommonStyle.priceText,CommonStyle.fontStrike]}>
+                                                {CommonFunction.currencyFormat(titem.price)}
+                                                <CustomTextR style={CommonStyle.priceText}>원</CustomTextR>
+                                            </TextRobotoR>
+                                        </TextRobotoB>
+                                    </>
+                                    :
+                                    <>
+                                        <CustomTextB style={CommonStyle.dataText}>{titem.unit}</CustomTextB>
+                                        <TextRobotoR style={CommonStyle.dataText}>
+                                            {CommonFunction.currencyFormat(titem.price)}원
+                                        </TextRobotoR>
+                                    </>
+                                }
+                            </View>
+                        </View>                      
+                        <View style={styles.bottomBoxRightSubWrap}>
+                            <TouchableOpacity style={styles.numberWrap} onPress={()=>this._orderCount('minus',tindex,titem)}>
+                                <NativeImage source={require('../../../assets/icons/btn_minus.png')} resizeMode={"contain"} style={styles.numberDataWrap} />
+                            </TouchableOpacity>
+                            <View style={styles.orderCountWrap}>
+                                <TextRobotoR style={CommonStyle.dataText15}>
+                                    {CommonFunction.currencyFormat(titem.count)}
+                                </TextRobotoR>
+                            </View>
+                            <TouchableOpacity style={styles.numberWrap} onPress={()=>this._orderCount('plus',tindex,titem)}>
+                                <NativeImage source={require('../../../assets/icons/btn_plus.png')} resizeMode={"contain"}style={styles.numberDataWrap}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )
+                })
+                }
+                
+                <View style={styles.totalPriceWrap} >
+                    <View style={styles.boxLeftWrap2}>
+                        <CustomTextR style={styles.menuTitleText4}>선택 합계금액</CustomTextR>
+                    </View>
+                    <View style={styles.boxRightWrap3}>
+                        <TextRobotoM style={styles.menuTitleText4}>{CommonFunction.currencyFormat(this.state.selectedTotalAmount)}원</TextRobotoM>
+                    </View>
+                </View>
+                <View style={[styles.defaultWrap,{minHeight:80}]}>   
+                    <TouchableOpacity style={styles.scrollFooterLeftWrap} onPress={()=>this.showPopLayer()}>
+                        <CustomTextB style={CommonStyle.scrollFooterText20}>장바구니 담기</CustomTextB>
+                    </TouchableOpacity> 
+                </View>
+            </View>            
+        )
+    }
+    setImages = async() => {
+        let selectedFilterCodeList = [];   
+        if ( !CommonUtil.isEmpty(this.state.productData.detail_img1) ) {
+            selectedFilterCodeList.push({
+                url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img1,
+                freeHeight:true
+            });
+        }  
+        if ( !CommonUtil.isEmpty(this.state.productData.detail_img2) ) {
+            selectedFilterCodeList.push({
+                url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img2,
+                freeHeight:true
+            });
+        }  
+        if ( !CommonUtil.isEmpty(this.state.productData.detail_img3) ) {
+            selectedFilterCodeList.push({
+                url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img3,
+                freeHeight:true
+            });
+        }  
+        if ( !CommonUtil.isEmpty(this.state.productData.detail_img4) ) {
+            selectedFilterCodeList.push({
+                url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img4,
+                freeHeight:true
+            });
+        }        
+        return selectedFilterCodeList;
+    }
+    setImageGallery = async( idx ) => {
+        let returnArray = await this.setImages()
+        this.setState({
+            imageIndex: idx,
+            thisImages : returnArray
+        })
+        this.setState({isImageViewVisible: true})
+    }
+
+    closePopUp = () => {
+        this.setState({isImageViewVisible: false,thisImages:[],imageIndex : null})
+    }
     render() {
+        const ImageFooter = ({ imageIndex, imagesCount }) => (
+            <View style={styles.footerRoot}>
+                <View style={styles.footerLeftRoot}>
+                    <CustomTextL style={styles.footerText}>{`${imageIndex + 1} / ${imagesCount}`}</CustomTextL>
+                </View>
+                <TouchableOpacity 
+                    hitSlop={{left:10,right:10,bottom:10,top:10}}
+                    style={styles.footerRightRoot}
+                    onPress={()=>this.closePopUp()}
+                >
+                    <Image source={HEADER_CLOSE_IMAGE} style={CommonStyle.defaultIconImage30} />
+                </TouchableOpacity>
+            </View>
+        )
         if ( this.state.loading ) {
             return (
                 <ActivityIndicator animating={this.state.loading} color={DEFAULT_COLOR.base_color} />
             )
         }else {  
-            const BottomCartOption = () => {        
-                return (
-                    <View style={[styles.bottomBuyTextContentWrapper,{height : this.state.moreSellerHeight}]}>
-                        <View style={{justifyContent:'center',alignItems:'center',width:'100%',backgroundColor:'#ff0000'}}>
-                            
-                        </View>
-                    </View>
-                )
-            }
+
             const alertContents =  
             (<View style={{flex:1,marginTop:10}}>
                 <View style={{paddingTop:0}}>
@@ -676,7 +849,9 @@ class ProductDetailScreen extends Component {
                             </View>
                         }
                     </View>
-                    <View style={CommonStyle.termLineWrap} />  
+                    <View style={CommonStyle.termLineWrap} />                    
+                    {this.enterCount()}  
+                    <View style={CommonStyle.termLineWrap80} />
                     <View style={{flex:1,marginVertical:2,paddingVertical:20,backgroundColor : "#fff",}}>
                         <View style={styles.boxWrap}>
                             <View style={styles.boxLeftWrap}>
@@ -726,6 +901,9 @@ class ProductDetailScreen extends Component {
                         <View style={styles.detailImageWrap}>
                             { 
                                 !CommonUtil.isEmpty(this.state.productData.detail_img1) &&
+                                <TouchableOpacity
+                                    onPress={() => this.setImageGallery(0)}
+                                >
                                 <FastImage
                                     source={{
                                         uri:DEFAULT_CONSTANTS.defaultImageDomain+this.state.productData.detail_img1,
@@ -742,6 +920,7 @@ class ProductDetailScreen extends Component {
                                         }
                                     }} */
                                 />
+                                </TouchableOpacity>
                             }
                         </View>
                         <View style={styles.detailImageWrap}>
@@ -785,112 +964,7 @@ class ProductDetailScreen extends Component {
                         </View>
                     </View>
                     <View style={CommonStyle.termLineWrap80} />
-                    {
-                        this.state.productData.is_soldout ? 
-                        <View style={styles.defaultWrap}>
-                            <View style={styles.scrollFooterLeftWrap2}>
-                                <CustomTextB style={CommonStyle.scrollFooterText}>품절된 상품입니다.</CustomTextB>
-                            </View>
-                            <View style={styles.renderIconDataWrap}>
-                                <TouchableOpacity style={styles.renderIconData} onPress={()=>this.registAlarm(this.state.productData)}>
-                                    <Icon name="bells" size={16} color="#fff" />
-                                    <CustomTextR style={styles.menuTextWhite}> 입고알림</CustomTextR>  
-                                </TouchableOpacity>
-                                {this.state.productData.measure > 0 &&
-                                <TouchableOpacity style={styles.renderIconData} onPress={()=>this.moveDetail3(this.state.productData)}>
-                                    <Icon name="sync" size={16} color="#fff" />
-                                    <CustomTextR style={styles.menuTextWhite}> 대체상품</CustomTextR>  
-                                </TouchableOpacity>
-                                }
-                            </View>
-                        </View>
-                        :
-                        <View>                            
-                        { 
-                            this.state.option.map((titem, tindex) => {  
-                            let isIndexOf = this.state.selectedArray.findIndex(                
-                                info => ( info.id === titem.id )
-                            ); 
-                            return (
-                            <View style={[styles.defaultWrap,{flexDirection:'row'}]} key={tindex}>
-                                <View style={styles.checkboxLeftWrap}>
-                                    <CheckBox 
-                                        iconType={'FontAwesome'}
-                                        checkedIcon={<NativeImage source={CHECKNOX_ON} resizeMode='contain' style={CommonStyle.checkboxIcon} />}
-                                        uncheckedIcon={<NativeImage source={CHECKNOX_OFF} resizeMode='contain' style={CommonStyle.checkboxIcon} />}
-                                        checkedColor={DEFAULT_COLOR.base_color}
-                                        checked={isIndexOf != -1 ? true : false}
-                                        size={CommonUtil.dpToSize(15)}                                    
-                                        onPress={() => this.checkItem(tindex,titem)}
-                                    />
-                                </View>
-                                <View style={styles.bottomBoxLeftSubWrap} >
-                                    <View style={{flex:1,justifyContent:'center',paddingVertical:5}}>
-                                        
-                                        { 
-                                            titem.event_price > 0 ?
-                                            <>
-                                                <View style={styles.unitWrap}>
-                                                    <CustomTextB style={CommonStyle.dataText}>{titem.unit}</CustomTextB>
-                                                    <View style={styles.percentWrap}>
-                                                        <TextRobotoR style={styles.salesText2}>
-                                                            {Math.round(100-(titem.event_price /titem.price*100))}%
-                                                        </TextRobotoR>
-                                                    </View>
-                                                </View>
-                                                <TextRobotoB style={CommonStyle.dataText}>
-                                                    {CommonFunction.currencyFormat(titem.event_price)}
-                                                    <CustomTextR style={CommonStyle.dataText}>{"원  "}</CustomTextR>
-                                                    <TextRobotoR style={[CommonStyle.priceText,CommonStyle.fontStrike]}>
-                                                        {CommonFunction.currencyFormat(titem.price)}
-                                                        <CustomTextR style={CommonStyle.priceText}>원</CustomTextR>
-                                                    </TextRobotoR>
-                                                </TextRobotoB>
-                                            </>
-                                            :
-                                            <>
-                                                <CustomTextB style={CommonStyle.dataText}>{titem.unit}</CustomTextB>
-                                                <TextRobotoR style={CommonStyle.dataText}>
-                                                    {CommonFunction.currencyFormat(titem.price)}원
-                                                </TextRobotoR>
-                                            </>
-                                        }
-                                    </View>
-                                </View>                      
-                                <View style={styles.bottomBoxRightSubWrap}>
-                                    <TouchableOpacity style={styles.numberWrap} onPress={()=>this._orderCount('minus',tindex,titem)}>
-                                        <NativeImage source={require('../../../assets/icons/btn_minus.png')} resizeMode={"contain"} style={styles.numberDataWrap} />
-                                    </TouchableOpacity>
-                                    <View style={styles.orderCountWrap}>
-                                        <TextRobotoR style={CommonStyle.dataText15}>
-                                            {CommonFunction.currencyFormat(titem.count)}
-                                        </TextRobotoR>
-                                    </View>
-                                    <TouchableOpacity style={styles.numberWrap} onPress={()=>this._orderCount('plus',tindex,titem)}>
-                                        <NativeImage source={require('../../../assets/icons/btn_plus.png')} resizeMode={"contain"}style={styles.numberDataWrap}
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        )
-                        })
-                        }
-                        
-                        <View style={styles.totalPriceWrap} >
-                            <View style={styles.boxLeftWrap2}>
-                                <CustomTextR style={styles.menuTitleText4}>선택 합계금액</CustomTextR>
-                            </View>
-                            <View style={styles.boxRightWrap3}>
-                                <TextRobotoM style={styles.menuTitleText4}>{CommonFunction.currencyFormat(this.state.selectedTotalAmount)}원</TextRobotoM>
-                            </View>
-                        </View>
-                        <View style={[styles.defaultWrap,{minHeight:80}]}>   
-                            <TouchableOpacity style={styles.scrollFooterLeftWrap} onPress={()=>this.showPopLayer()}>
-                                <CustomTextB style={CommonStyle.scrollFooterText20}>장바구니 담기</CustomTextB>
-                            </TouchableOpacity> 
-                        </View>
-                    </View>
-                    }
+                    {this.enterCount()}
                     { 
                         this.state.moreLoading &&
                         <View style={CommonStyle.moreWrap}>
@@ -898,6 +972,25 @@ class ProductDetailScreen extends Component {
                         </View>
                     }
                     </ScrollView>
+                    <Modal 
+                        visible={this.state.isImageViewVisible} transparent={true}
+                        onRequestClose={() => this.setState({ isImageViewVisible: false })}
+                        style={{margin:0,padding:0}}
+                    >
+                        <ImageViewer      
+                            //glideAlways
+                            imageUrls={this.state.thisImages}
+                            index={this.state.imageIndex}
+                            enableSwipeDown={true}
+                            useNativeDriver={true}
+                            saveToLocalByLongPress={true}
+                            renderIndicator={this.renderIndicator}
+                            onSwipeDown={() => this.setState({ isImageViewVisible: false })}
+                            renderFooter={(currentIndex) => (
+                                <ImageFooter imageIndex={currentIndex} imagesCount={this.state.thisImages.length} />
+                            )}
+                        />
+                    </Modal>
                 </View>
             );
         }
@@ -1182,6 +1275,30 @@ const styles = StyleSheet.create({
     },
     bottomDataWrap : {
         width:80,backgroundColor:'#e1e1e1',justifyContent:'center',alignItems:'center',padding:5,marginRight:5
+    },
+    footerRoot: {
+        flex:1,
+        flexDirection:'row',
+        height: 64,
+        width : SCREEN_WIDTH,
+        paddingHorizontal:50,
+        backgroundColor: "#00000077",
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    footerLeftRoot : {
+        flex:6,
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    footerRightRoot : {
+        flex:1,
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    footerText: {
+        fontSize: 17,
+        color: "#FFF"
     }
 });
 

@@ -97,7 +97,7 @@ export default  class PopLayerAddress extends Component {
         }
     }
 
-    animatedHeight = new Animated.Value(SCREEN_HEIGHT * 0.5);
+    animatedHeight = new Animated.Value(SCREEN_HEIGHT * 0.9);
     closeModalDaum = () => {
         this.setState({ showModalDaum: false });      
     };

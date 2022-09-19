@@ -41,7 +41,8 @@ class PopupScreen extends Component {
     }
 
     UNSAFE_componentWillMount() {
-        //console.log('this.props.screenState.popLayerList2',this.props.screenState.popLayerList)
+        console.log('this.props.screenState.popLayerList2',this.props.screenState.popLayerList)
+        
         this.setState({
             popLayerList : this.props.screenState.popLayerList,
         })
@@ -99,15 +100,25 @@ class PopupScreen extends Component {
             <ScalableImage
                 source={{uri:DEFAULT_CONSTANTS.defaultImageDomain + item.img_url}}
                 width={SCREEN_WIDTH*0.9}
-                //height={SCREEN_HEIGHT*0.8}
+                height={SCREEN_WIDTH*0.9/3*4}
                 indicator={Progress.Pie}
                 indicatorProps={{size: 80,borderWidth: 0,color: DEFAULT_COLOR.base_color,unfilledColor:'#fff'}}
             /> 
         )
     }
 
+    renderImageNew = (item) => {
+        return (
+            <Image
+                source={{uri:DEFAULT_CONSTANTS.defaultImageDomain + item.img_url}}
+                style={{width:SCREEN_WIDTH*0.9, height:SCREEN_WIDTH*0.9/3*4}}
+                resizeMode={'contain'}
+            /> 
+        )
+    }
+
     moveBannerDetail = async(item) => {
-        //console.log('moveBannerDetail',item)
+        
         if ( item.popup_gubun === 'Notice') {
         }else{
             this.setState({loading:false});
@@ -130,6 +141,13 @@ class PopupScreen extends Component {
                     screenTitle: item.popup_title,
                     screenData:{...item,event_pk:item.target_pk,event_name:item.popup_title}
                 });
+            }else if ( item.inlink_type === 'CATEGORY') {
+                this.closePopUp()                
+                setTimeout(() => {
+                    this.props.screenProps.navigation.navigate('ProductListStack',{
+                        screenData:{...item,category_pk:item.target_pk,category_name : item.popup_title}
+                    });
+                }, 500);
             }else{
                
             }
@@ -151,7 +169,7 @@ class PopupScreen extends Component {
         }
         this.setState({showPopupLayer:bool})
     }
-    animatedHeight = new Animated.Value(SCREEN_HEIGHT * 0.7);
+    animatedHeight = new Animated.Value(SCREEN_WIDTH/3*4);
     render() {
         if ( this.state.loading ) {
             return (
@@ -173,13 +191,13 @@ class PopupScreen extends Component {
             >
                 <View style={styles.modalBackground}>
                     <Animated.View style={[styles.modalContainer,{ height: this.animatedHeight }]}>
-                        <TouchableOpacity 
+                        {/* <TouchableOpacity 
                             hitSlop={{left:10,right:10,bottom:10,top:10}}
                             style={styles.modalTop}
                             onPress={()=>this.closePopUp()}
                         > 
                             <Image source={HEADER_CLOSE_IMAGE} style={CommonStyle.defaultIconImage30} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                         <View style={{flex:1,overflow:'hidden'}}>
                             <Swiper
                                 style={[{margin:0,padding:0,backgroundColor:'transparent',height:'100%'}]}
@@ -199,7 +217,7 @@ class PopupScreen extends Component {
                                             style={{flex:1,minHeight:'100%'}}
                                         >
                                             <View style={styles.imageWarp}>
-                                                {this.renderImage(imageItem)}
+                                                {this.renderImageNew(imageItem)}
                                             </View>
                                             {/*
                                             <View style={styles.contentStyle}>
@@ -282,7 +300,7 @@ const styles = StyleSheet.create({
         left : 0,
         //paddingBottom:5,
         width:SCREEN_WIDTH*0.9,
-        height:50,
+        height:60,
         zIndex:15
     },
     moveButton  : {
@@ -295,9 +313,9 @@ const styles = StyleSheet.create({
     modalContainer: {   
         //top : BASE_HEIGHY,
         width:SCREEN_WIDTH*0.9,
-        height: SCREEN_HEIGHT*0.8,
+        height: SCREEN_HEIGHT*0.7,
         borderRadius:10,
-        paddingTop: 16,
+        paddingTop: 0,
         backgroundColor: '#fff'
     },
     paginationStyle: {

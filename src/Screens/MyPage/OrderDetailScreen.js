@@ -14,7 +14,7 @@ const DEFAULT_CONSTANTS = getDEFAULT_CONSTANTS.DEFAULT_CONSTANTS;
 const DEFAULT_TEXT = getDEFAULT_CONSTANTS.DEFAULT_TEXT;
 const DEFAULT_COLOR = getDEFAULT_CONSTANTS.DEFAULT_COLOR;
 const {height: SCREEN_HEIGHT, width: SCREEN_WIDTH} = Dimensions.get('window');
-import {CustomTextR,CustomTextL, CustomTextB, CustomTextM, TextRobotoB,TextRobotoM,TextRobotoR,DropBoxIcon} from '../../Components/CustomText';
+import {CustomTextR,CustomTextL, CustomTextB, CustomTextM, TextRobotoB,TextRobotoM,TextRobotoR,DropBoxIcon, TextRobotoL} from '../../Components/CustomText';
 import CustomAlert from '../../Components/CustomAlert';
 import Loader from '../../Utils/Loader';
 import CommonUtil from '../../Utils/CommonUtil';
@@ -86,7 +86,7 @@ class OrderDetailScreen extends Component {
             const token = this.props.userToken.apiToken;
             let sendData = null;
             returnCode = await apiObject.API_getPageList(this.props,url,token,sendData);          
-            console.log('OrderDetailScreenreturnCode',returnCode.data.orderBase)   
+            //console.log('OrderDetailScreenreturnCode',returnCode.data.orderBase)   
             if ( returnCode.code === '0000'  ) {
                 this.setState({
                     orderBase : returnCode.data.orderBase,
@@ -215,9 +215,9 @@ class OrderDetailScreen extends Component {
                 imp_uid : this.state.settleInfo.imp_uid,
                 price : this.state.orderBase.total_amount
             }
-            console.log('sendData',sendData)  
+            //console.log('sendData',sendData)  
             returnCode = await apiObject.API_updateCommon(this.props,url,token,sendData);          
-            console.log('returnCode',returnCode)   
+            //console.log('returnCode',returnCode)   
             this.setState({moreLoading:false,loading:false})
             if ( returnCode.code === '0000'  ) {
                 this.props.navigation.navigate('OrderBaroCancelStack',{
@@ -248,7 +248,7 @@ class OrderDetailScreen extends Component {
             }
               
             returnCode = await apiObject.API_updateCommon(this.props,url,token,sendData);          
-            console.log('returnCode',returnCode)   
+            //console.log('returnCode',returnCode)   
             this.setState({moreLoading:false,loading:false})
             if ( returnCode.code === '0000'  ) {
                 this.props.navigation.navigate('OrderBankCancelStack',{
@@ -276,7 +276,7 @@ class OrderDetailScreen extends Component {
                 comment : '주문취소(미입금)'
             }  
             returnCode = await apiObject.API_updateCommon(this.props,url,token,sendData);          
-            console.log('returnCode',returnCode)   
+            //console.log('returnCode',returnCode)   
             this.setState({moreLoading:false,loading:false})
             if ( returnCode.code === '0000'  ) {
                 this.props.navigation.navigate('OrderBaroCancelStack',{
@@ -389,6 +389,57 @@ class OrderDetailScreen extends Component {
         }
     }
 
+    renderUnitPrice = (item,titem,tindex) => {
+        if ( item.isHaveCarton && item.isHaveCartonPrice > 0 ) {
+            if ( titem.unit_type === 'Each') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveCartonPrice)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+
+            }else if ( titem.unit_type === 'Box') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveCartonPrice*item.box_unit)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+            }else{
+                return (
+                    <TextRobotoL style={CommonStyle.dataText}>
+                        {CommonFunction.currencyFormat(titem.price)}{"원"}
+                    </TextRobotoL>
+                )
+            }
+        }else  if ( item.isHaveBox && item.isHaveBoxPrice > 0 ) {
+            if ( titem.unit_type === 'Each') {
+                return (
+                    <TextRobotoL style={[CommonStyle.dataText,{lineHeight:16}]}>
+                        {CommonFunction.currencyFormat(item.isHaveBoxPrice)}
+                        <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                    </TextRobotoL>
+                )
+
+            }else{
+                return (
+                    <TextRobotoL style={CommonStyle.dataText}>
+                        {CommonFunction.currencyFormat(titem.price)}{"원"}
+                    </TextRobotoL>
+                )
+            }
+        }else{
+            return (
+                <TextRobotoL style={CommonStyle.dataText}>
+                    {CommonFunction.currencyFormat(titem.price)}
+                    <CustomTextR style={CommonStyle.dataText}>{"원"}</CustomTextR>
+                </TextRobotoL>
+            )
+
+        }
+    }
+
     render() {
         if ( this.state.loading ) {
             return (
@@ -490,8 +541,12 @@ class OrderDetailScreen extends Component {
                                                 <CustomTextR style={CommonStyle.priceText}> 수량:{CommonFunction.currencyFormat(titem.quantity)}</CustomTextR>
                                             </View>
                                             :
+                                            //this.renderUnitPrice(item,titem,tindex)
                                             <View style={styles.unitWrap}>
-                                                <CustomTextR style={CommonStyle.dataText}>{CommonFunction.replaceUnitType(titem.unit_type)}({CommonFunction.currencyFormat(titem.price)}원)</CustomTextR>
+                                                <CustomTextR style={CommonStyle.dataText}>
+                                                    {CommonFunction.replaceUnitType(titem.unit_type)}
+                                                    ({this.renderUnitPrice(item,titem,tindex)})
+                                                </CustomTextR>
                                                 <CustomTextR style={CommonStyle.dataText}> 수량:{CommonFunction.currencyFormat(titem.quantity)}</CustomTextR>
                                                 
                                             </View>
@@ -954,6 +1009,9 @@ const styles = StyleSheet.create({
     },
     unitWrap : {
         flex:1,flexDirection:'row',alignItems:'center'
+    },
+    unitWrap2 : {
+        flex:1,justifyContent:'center'
     },
     dataSubWrap : {
         flex:1,
