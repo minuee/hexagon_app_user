@@ -12,6 +12,7 @@ const defaultState = {
     choiceProductArray : [],
     userCartCount : 0,
     userZzimCount : 0,
+    myZzimArray : [],
     userOrderingCount : 0,
     userNowPoint : 0
 }
@@ -37,6 +38,11 @@ export default StatusReducer = (state = defaultState, action) => {
             return {     
             ...state,
             userZzimCount : action.return_userZzimCount
+        }; 
+        case types.GLOBAL_STATUS_MY_ZZIM_LIST:
+            return {     
+            ...state,
+            myZzimArray : action.return_myZzimArray
         }; 
         case types.GLOBAL_STATUS_USER_ORDERING:
             return {     

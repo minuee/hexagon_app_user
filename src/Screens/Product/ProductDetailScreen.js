@@ -51,6 +51,8 @@ class ProductDetailScreen extends Component {
             selectedTotalAmount : 0,
             detail_img1_width : 0,
             detail_img1_height : 0,
+            detail_img1_width_origin : 0,
+            detail_img1_height_origin : 0,
             detail_img2_width : 0,
             detail_img2_height : 0,
             detail_img3_width : 0,
@@ -185,10 +187,12 @@ class ProductDetailScreen extends Component {
         if ( !CommonUtil.isEmpty( data.detail_img1)) {
             const img1 = DEFAULT_CONSTANTS.defaultImageDomain+data.detail_img1;
             await NativeImage.getSize(img1, (width, height) => { 
-                console.log('ddd0',width + ' - ' + height); 
+                //console.log('ddd0',width + ' - ' + height); 
                 detail_img1_height = height;
                 detail_img1_width = width;
                 this.setState({
+                    detail_img1_height_origin : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width,
+                    detail_img1_width_origin : SCREEN_WIDTH-20,
                     detail_img1_height : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width
                 })
             });
@@ -208,7 +212,7 @@ class ProductDetailScreen extends Component {
         if ( !CommonUtil.isEmpty( data.detail_img3)) {
             const img3 = DEFAULT_CONSTANTS.defaultImageDomain+data.detail_img3;
             await NativeImage.getSize(img3, (width, height) => { 
-                console.log(width + ' - ' + height); 
+                //console.log(width + ' - ' + height); 
                 detail_img3_height = height;
                 detail_img3_width = width;
                 this.setState({
@@ -220,7 +224,7 @@ class ProductDetailScreen extends Component {
         if ( !CommonUtil.isEmpty( data.detail_img4)) {
             const img4 = DEFAULT_CONSTANTS.defaultImageDomain+data.detail_img4;
             await NativeImage.getSize(img4, (width, height) => { 
-                console.log(width + ' - ' + height); 
+                //console.log(width + ' - ' + height); 
                 detail_img4_height = height;
                 detail_img4_width = width;
                 this.setState({
@@ -233,9 +237,9 @@ class ProductDetailScreen extends Component {
         if ( count > 0 && detail_img1_height != 0 ) {
             
             setTimeout(() => {
-                console.log('ddd1',Platform.OS, detail_img1_height); 
-                console.log('ddd2',detail_img1_width); 
-                console.log('ddd3',(SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width); 
+                //console.log('ddd1',Platform.OS, detail_img1_height); 
+                //console.log('ddd2',detail_img1_width); 
+                //console.log('ddd3',(SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width); 
                 this.setState({
                     detail_img1_height : (SCREEN_WIDTH-20) * detail_img1_height/detail_img1_width,
                     detail_img2_height : (SCREEN_WIDTH-20) * detail_img2_height/detail_img2_width,
@@ -595,17 +599,22 @@ class ProductDetailScreen extends Component {
         )
     }
     setImages = async() => {
-        let selectedFilterCodeList = [];   
+        let selectedFilterCodeList = [];
+        console.log('eddddd',this.state.detail_img1_height_origin)
+        console.log('eddddd',this.state.detail_img1_width_origin)
         if ( !CommonUtil.isEmpty(this.state.productData.detail_img1) ) {
             selectedFilterCodeList.push({
                 url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img1,
-                freeHeight:true
+                freeHeight:true,
+                freeWidth:true,
+                width:this.state.detail_img1_width_origin,
+                height:this.state.detail_img1_height_origin
             });
         }  
         if ( !CommonUtil.isEmpty(this.state.productData.detail_img2) ) {
             selectedFilterCodeList.push({
                 url : DEFAULT_CONSTANTS.defaultImageDomain + this.state.productData.detail_img2,
-                freeHeight:true
+                freeHeight:true,freeWidth:true
             });
         }  
         if ( !CommonUtil.isEmpty(this.state.productData.detail_img3) ) {
@@ -626,9 +635,9 @@ class ProductDetailScreen extends Component {
         let returnArray = await this.setImages()
         this.setState({
             imageIndex: idx,
-            thisImages : returnArray
-        })
-        this.setState({isImageViewVisible: true})
+            thisImages : returnArray,
+            isImageViewVisible : true
+        })        
     }
 
     closePopUp = () => {
@@ -983,8 +992,10 @@ class ProductDetailScreen extends Component {
                             index={this.state.imageIndex}
                             enableSwipeDown={true}
                             useNativeDriver={true}
+                            enablePreload={true}
                             saveToLocalByLongPress={true}
                             renderIndicator={this.renderIndicator}
+                            maxOverflow={300}
                             onSwipeDown={() => this.setState({ isImageViewVisible: false })}
                             renderFooter={(currentIndex) => (
                                 <ImageFooter imageIndex={currentIndex} imagesCount={this.state.thisImages.length} />

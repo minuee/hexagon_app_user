@@ -24,6 +24,7 @@ import Loader from '../../Utils/Loader';
 import { apiObject } from "../Apis";
 const ICON_CART = require('../../../assets/icons/icon_cart.png');
 const ICON_ZZIM = require('../../../assets/icons/icon_zzim.png');
+const ICON_ZZIM_ON = require('../../../assets/icons/icon_zzim2.png');
 const DefaultPaginate = 10;
 
 
@@ -308,7 +309,7 @@ class IntroScreen extends Component {
             }
         }
     }
-    addZzimAlert = (item) => {
+    addZzimAlert = (item,isBool) => {
         if ( CommonUtil.isEmpty(this.props.userToken)) {
             Alert.alert(DEFAULT_CONSTANTS.appName, '로그인이 필요합니다.\n로그인 하시겠습니까',
             [
@@ -316,25 +317,32 @@ class IntroScreen extends Component {
                 {text: '취소', onPress: () => console.log('취소')},
             ]);
         }else{
-            this.registZzim(item)
+            this.registZzim(item,isBool)
         }
     }
 
-    registZzim = async (item) => {
-        await this.setState({moreLoading:true})
+    registZzim = async (item,isBool) => {
+        this.setState({moreLoading:true})
         let returnCode = {code:9998};
         try {            
             const url = DEFAULT_CONSTANTS.apiAdminDomain + '/v1/bookmark/eachadd';
             const token = this.props.userToken.apiToken;
             let sendData = {
                 member_pk : this.props.userToken.member_pk,
-                product_pk : item.product_pk
+                product_pk : item.product_pk,
+                isNew : isBool != -1 ? false : true,
+                bookmark_pk : isBool != -1 ? this.props.myZzimArray[isBool].bookmark_pk : null,
             };
             returnCode = await apiObject.API_registCommon(this.props,url,token,sendData);
             if ( returnCode.code === '0000'  ) {
                 let userZzimCount = CommonUtil.isEmpty(returnCode.totalCount) ? 0 : returnCode.totalCount ;
                 this.props._fn_getUserZzimCount(userZzimCount);
-                CommonFunction.fn_call_toast('찜리스트에 추가되었습니다',2000);
+                this.props._fn_getMyZzimList(returnCode.zzimlist);
+                if ( isBool != -1 ) {
+                    CommonFunction.fn_call_toast('찜리스트에서 제거되었습니다',2000);
+                }else{
+                    CommonFunction.fn_call_toast('찜리스트에 추가되었습니다',2000);
+                }
             }else{
                 CommonFunction.fn_call_toast('오류가 발생하였111습니다, 잠시후 다시 이용해주세요',2000);
             }
@@ -388,6 +396,20 @@ class IntroScreen extends Component {
             </View>
             :
             null
+        )
+    }
+
+    renderIcons2 = (item, idx ) => {
+        const isMyZzim = this.props.myZzimArray.findIndex(i => i.product_pk == item.product_pk);
+        return (
+            <>
+            <TouchableOpacity onPress={()=>this.addEachAlert(item,idx)}style={styles.cartIcoWrap}>
+                <NativeImage source={ICON_CART} resizeMode={"contain"} style={styles.icon_cart_image} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={()=>this.addZzimAlert(item,isMyZzim)}style={styles.zzimIconWrap}>
+                <NativeImage source={isMyZzim != -1 ? ICON_ZZIM_ON : ICON_ZZIM} resizeMode={"contain"} style={styles.icon_cart_image} />
+            </TouchableOpacity>
+            </>
         )
     }
 
@@ -491,12 +513,7 @@ class IntroScreen extends Component {
                                                 </View>  
                                             </View>                                        
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>this.addEachAlert(item,index)}style={styles.cartIcoWrap}>
-                                            <NativeImage source={ICON_CART} resizeMode={"contain"} style={styles.icon_cart_image} />
-                                        </TouchableOpacity>
-                                        <TouchableOpacity onPress={()=>this.registZzim(item)}style={styles.zzimIconWrap}>
-                                            <NativeImage source={ICON_ZZIM} resizeMode={"contain"} style={styles.icon_cart_image} />
-                                        </TouchableOpacity>
+                                        {this.renderIcons2(item,index)}
                                     </View>
                                 )
                                 })
@@ -712,7 +729,8 @@ const styles = StyleSheet.create({
 
 function mapStateToProps(state) {
     return {
-        userToken : state.GlabalStatus.userToken
+        userToken : state.GlabalStatus.userToken,
+        myZzimArray : state.GlabalStatus.myZzimArray
     }
 }
 
@@ -729,6 +747,9 @@ function mapDispatchToProps(dispatch) {
         },
         _fn_getUserZzimCount : (num) => {
             dispatch(ActionCreator.fn_getUserZzimCount(num))
+        },
+        _fn_getMyZzimList : (arr) => {
+            dispatch(ActionCreator.fn_getMyZzimList(arr))
         },
     };
 }

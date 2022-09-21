@@ -33,6 +33,13 @@ export function fn_getUserZzimCount(num) {
         return_userZzimCount : num,
     };
 }
+
+export function fn_getMyZzimList(arr) {
+    return {
+        type: types.GLOBAL_STATUS_MY_ZZIM_LIST,
+        return_myZzimArray : arr,
+    };
+}
 export function fn_getUserOrderingCount(num) {
     return {
         type: types.GLOBAL_STATUS_USER_ORDERING,

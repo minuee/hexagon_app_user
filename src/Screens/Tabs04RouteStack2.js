@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import {TouchableOpacity,Image,PixelRatio,View,StyleSheet} from 'react-native';
-import {useSelector,useDispatch} from 'react-redux';
-import LinearGradient from 'react-native-linear-gradient';
-import ActionCreator from '../Ducks/Actions/MainActions';
+import {TouchableOpacity,Image,PixelRatio,View,Alert} from 'react-native';
 const Stack = createStackNavigator();
+import {useSelector,useDispatch} from 'react-redux';
 //공통상수
 import  * as getDEFAULT_CONSTANTS   from '../Constants';
 import CommonStyle from '../Style/CommonStyle';
@@ -13,7 +11,7 @@ const DEFAULT_COLOR = getDEFAULT_CONSTANTS.DEFAULT_COLOR;
 import {CustomTextB,CustomTextR} from '../Components/CustomText';
 import CommonUtil from '../Utils/CommonUtil';
 const BACK_BUTTON_IMAGE = require('../../assets/icons/back_icon2.png');
-const HEADER_HAMBURG_IMAGE = require('../../assets/icons/icon_hamburg.png');
+const ICON_CART = require('../../assets/icons/icon_cart.png');
 import {createStackNavigator} from '@react-navigation/stack';
 
 import MyInfoScreen from './Tabs04/MyInfoScreen';
@@ -24,6 +22,7 @@ import MyIDModifyScreen from './Tabs04/MyIDModifyScreen';
 import MyPWModifyScreen from './Tabs04/MyPWModifyScreen';
 import MyBookMarkScreen from './Tabs04/MyBookMarkScreen'
 import MyAlarmScreen from './Tabs04/MyAlarmScreen'
+import CustomAlert from '../Components/CustomAlert';
 
 const MyInfoStack = ({navigation,route}) => {
     let navTitle = '계정설정' ;
@@ -208,7 +207,21 @@ const MyPWModifyStack = ({navigation,route}) => {
 
 const MyBookMarkStack = ({navigation,route}) => {
     let navTitle = '찜리스트' ;
+
+  /*   const reduxData = useSelector(state => state);
+     const {userToken} = reduxData.GlabalStatus;
     
+    const CustomAlert = () => {
+        Alert.alert(DEFAULT_CONSTANTS.appName, '찜리스트의 모든 상품을 장바구니에 추가하시겠습니까?',
+        [
+            {text: '확인', onPress: () => actionInsertCart(userToken)},
+            {text: '취소', onPress: () => console.log('취소')},
+        ]);
+    }
+
+    const actionInsertCart = () => {
+
+    } */
     return (
         <Stack.Navigator
             initialRouteName={'MyBookMarkScreen'}
@@ -225,6 +238,9 @@ const MyBookMarkStack = ({navigation,route}) => {
                     </View>
                 ),
                 headerRight : (props) => (<View style={CommonStyle.stackHeaderRightWrap} />),  
+                /* headerRight : (props) => (<TouchableOpacity onPress= {()=> CustomAlert()} style={CommonStyle.stackHeaderRightWrap} >
+                    <Image source={ICON_CART} style={{width: PixelRatio.roundToNearestPixel(DEFAULT_TEXT.fontSize25), height: PixelRatio.roundToNearestPixel(DEFAULT_TEXT.fontSize25)}} />
+                    </TouchableOpacity>),   */
             }}
             
         >

@@ -316,7 +316,7 @@ class IntroScreen extends Component {
             DEFAULT_CONSTANTS.appName,      
             "로그아웃하시겠습니까?",
             [
-                {text: '네', onPress: () => this.logoutAction()},
+                {text: '네', onPress: () => this.logoutAtiveAction()},
                 {text: '아니오', onPress: () => console.log('Cancle')},
                 
             ],
@@ -325,7 +325,7 @@ class IntroScreen extends Component {
     }
 
   
-    logoutAction = async() => {
+    logoutAtiveAction = async() => {
         await AsyncStorage.removeItem('autoLoginData');
         this.props._saveNonUserToken(null);
         this.props._saveUserToken({});

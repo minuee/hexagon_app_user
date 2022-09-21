@@ -848,7 +848,7 @@ class OrderDetailScreen extends Component {
                         </TouchableOpacity>
                         <View style={{padding:15}}>
                             <CustomTextR style={styles.dataTitleText2}>- 주문 취소(카드)는 배송전에만 가능합니다.</CustomTextR>
-                            <CustomTextR style={styles.dataTitleText2}>- 핸드폰소액결제의 경우 포인트로 환급됩니다.</CustomTextR> 
+                            <CustomTextR style={styles.dataTitleText2}>- 핸드폰소액결제의 경우 적립금으로 환급됩니다.</CustomTextR> 
                             <CustomTextR style={styles.dataTitleText2}>- 계좌이체로 입금된 경우, 선택하신 계죄로 환불됩니다.(확인에 따라 다소 시간이 소요될수 있습니다)</CustomTextR> 
                         </View>
                         {this.state.settleInfo.pay_method === 'vbank' &&

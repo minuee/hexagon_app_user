@@ -78,10 +78,13 @@ class RecommScreen extends Component {
                     PopFullScreenList : CommonUtil.isEmpty(returnCode.data.popup_full) ? []: returnCode.data.popup_full
                 })
                 //
+                console.log('returnCode.data.bookmarklist',returnCode.data.bookmarklist)
                 this.props._fn_getUserCartCount(CommonUtil.isEmpty(returnCode.data.carttotalcount)?0:returnCode.data.carttotalcount);
                 this.props._fn_getUserZzimCount(CommonUtil.isEmpty(returnCode.data.zzimtotalcount)?0:returnCode.data.zzimtotalcount);
                 this.props._fn_getUserOrderingCount(CommonUtil.isEmpty(returnCode.data.orderingcount)?0:returnCode.data.orderingcount);
                 this.props._fn_getUserPoint(CommonUtil.isEmpty(returnCode.data.remain_reward)?0:returnCode.data.remain_reward);
+                this.props._fn_getMyZzimList(CommonUtil.isEmpty(returnCode.data.bookmarklist)?[]:returnCode.data.bookmarklist)
+
                 //console.log('TodayTimeStamp',TodayTimeStamp);
                 //console.log('this.state.popLayerExpireTime',Platform.OS,this.state.popLayerExpireTime);   
                 //console.log('this.state.popFullExpireTime',Platform.OS,this.state.popFullExpireTime);
@@ -1110,6 +1113,9 @@ function mapDispatchToProps(dispatch) {
         },
         _fn_getUserZzimCount : (num) => {
             dispatch(ActionCreator.fn_getUserZzimCount(num))
+        },
+        _fn_getMyZzimList : (arr) => {
+            dispatch(ActionCreator.fn_getMyZzimList(arr))
         },
         _fn_getUserOrderingCount : (num) => {
             dispatch(ActionCreator.fn_getUserOrderingCount(num))

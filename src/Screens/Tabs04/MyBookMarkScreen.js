@@ -78,14 +78,16 @@ class MyBookMarkScreen extends Component {
         let paddingToBottom = 1;
         paddingToBottom += event.nativeEvent.layoutMeasurement.height;                            
         if (event.nativeEvent.contentOffset.y + paddingToBottom >= event.nativeEvent.contentSize.height) {            
-            //this.scrollEndReach();
+            this.scrollEndReach();
         }
     }
     upButtonHandler = () => {        
         this.ScrollView.scrollTo({ x: 0,  animated: true });
     };
     scrollEndReach = () => {       
-       
+        if ( this.state.ismore && !this.state.moreLoading ) {
+            this.getBaseData(this.state.currentPage+1,true)
+        }
     }    
     moveDetail = (item) => {
         if ( CommonUtil.isEmpty(this.props.userToken)) {
@@ -118,6 +120,50 @@ class MyBookMarkScreen extends Component {
         await this.setState({orderSeq : mode})
         await this.getBaseData(1,false)
         this.closeModal()
+    }
+
+    allInsertCart = () => {
+        Alert.alert(DEFAULT_CONSTANTS.appName, '찜리스트의 전체상품을 장바구니에 넣겠습니까',
+        [
+            {text: '확인', onPress: () => actionAllInsertCart()},
+            {text: '취소', onPress: () => console.log('취소')},
+        ]); 
+    }
+
+    setDataToArray = async() => {
+        let optionList = [];            
+            this.state.bookmarkList.forEach(function(element,index,array){ 
+            optionList.push({
+                product_pk : element.product_pk,
+                unit_type : 'Each',
+                quantity : 1
+            });
+        })
+        return optionList;        
+    } 
+
+    actionAllInsertCart = async() => {
+        const newChild =  await this.setDataToArray();
+        this.setState({moreLoading:true,loading:true})
+        let returnCode = {code:9998};     
+        try {            
+            const url = DEFAULT_CONSTANTS.apiAdminDomain + '/v1/cart/arrayadd';           
+            const token = this.props.userToken.apiToken;
+            let sendData = {
+                member_pk : this.props.userToken.member_pk,
+                data_array : newChild
+            }
+            returnCode = await apiObject.API_registCommon(this.props,url,token,sendData);            
+            if ( returnCode.code === '0000'  ) {
+                this.setState({popLayerView : true,moreLoading:false,loading:false});
+                this.props._fn_getUserCartCount(returnCode.data.totalCount)
+            }else{
+                CommonFunction.fn_call_toast('처리중 오류가 발생하였습니다.\n[ERR]' + returnCode.msg ,2000);
+                this.setState({moreLoading:false,loading:false})
+            }
+        }catch(e){            
+            this.setState({loading:false,moreLoading : false})
+        }
     }
 
     removeZzimAlert = (item) => {
@@ -176,7 +222,7 @@ class MyBookMarkScreen extends Component {
         }
     }
     addCart = async(item) => {
-        await this.setState({moreLoading:true})
+        this.setState({moreLoading:true})
         let returnCode = {code:9998};
         try {            
             const url = DEFAULT_CONSTANTS.apiAdminDomain + '/v1/cart/eachadd';
@@ -387,17 +433,17 @@ class MyBookMarkScreen extends Component {
                     } 
                     </View>
                     {
-                        this.state.ismore &&
+                        this.state.bookmarkList.length > 0  &&
                         <View style={CommonStyle.moreButtonWrap}>
                             <TouchableOpacity 
-                                onPress={() => this.getBaseData(this.state.currentPage+1,true)}
+                                onPress={() => this.allInsertCart()}
                                 style={CommonStyle.moreButton}
                             >
-                            <CustomTextL style={CommonStyle.moreText}>더보기</CustomTextL>
+                            <CustomTextL style={CommonStyle.moreText}>전체 장바구니 넣기</CustomTextL>
                             </TouchableOpacity>
                         </View>
                     }
-                    <View style={[CommonStyle.blankArea,{backgroundColor:DEFAULT_COLOR.default_bg_color}]}></View>
+                    <View style={[CommonStyle.blankArea]}></View>
                     {   
                         this.state.moreLoading &&
                         <View style={CommonStyle.moreWrap}>
@@ -414,7 +460,7 @@ class MyBookMarkScreen extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor : "#f5f6f8"
+        backgroundColor : "#fff"
     },
     IndicatorContainer : {
         flex: 1,

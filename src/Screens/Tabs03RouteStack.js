@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import {TouchableOpacity,Image,PixelRatio,View,StyleSheet} from 'react-native';
-import {useSelector,useDispatch} from 'react-redux';
-import LinearGradient from 'react-native-linear-gradient';
-import ActionCreator from '../Ducks/Actions/MainActions';
 const Stack = createStackNavigator();
 //공통상수
 import  * as getDEFAULT_CONSTANTS   from '../Constants';

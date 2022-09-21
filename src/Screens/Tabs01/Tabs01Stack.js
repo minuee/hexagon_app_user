@@ -58,7 +58,7 @@ const MaterialTopTabNavi = (navigation) => {
             
             swipeEnabled={false}
         >
-            <MaterailTopTab.Screen name="제품추천" >
+            <MaterailTopTab.Screen name="HOME" >
                 {props => <RecommScreen {...props} />}
             </MaterailTopTab.Screen>
             <MaterailTopTab.Screen name="신제품" >

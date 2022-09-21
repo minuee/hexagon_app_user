@@ -146,7 +146,7 @@ class OrderCancelScreen extends Component {
                          <View style={{paddingVertical:15,justifyContent:'center',alignItems:'center'}}>
                             <CustomTextR style={styles.menuTitleText}>주문취소 접수가 완료되었습니다.</CustomTextR>
                             <View style={{padding:5}}>
-                                <CustomTextR style={[styles.pointText,{color:'#888'}]}>관리자가 주문취소처리후 포인트로 환급됩니다.</CustomTextR>
+                                <CustomTextR style={[styles.pointText,{color:'#888'}]}>관리자가 주문취소처리후 적립금으로 환급됩니다.</CustomTextR>
                             </View>
                          </View>
                        

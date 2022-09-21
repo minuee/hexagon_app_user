@@ -34,7 +34,7 @@ const DEFAULT_CONSTANTS = {
     apiAdminDomain : 'https://b2e4ceh3wj.execute-api.ap-northeast-1.amazonaws.com/hax-prod-api-stage',
     BottomHeight : isIphoneX() ? 70 : 50,
 
-    return_CashTitle : '포인트로 환급',
+    return_CashTitle : '적립금으로 환급',
     return_ProductTitle : '상품 입고시 배송',
 
     
